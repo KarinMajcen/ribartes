@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
+import 'lestvica_screen.dart';
 import 'moje_dovolilnice_screen.dart';
 import 'preveri_dovolilnico_screen.dart';
 import 'revirji_screen.dart';
@@ -92,6 +93,11 @@ class HomeScreen extends StatelessWidget {
                 ikona: Icons.photo_album,
                 besedilo: 'Ribji album in ulovi',
                 zaslon: const RibjiAlbumScreen(),
+              ),
+              _Gumb(
+                ikona: Icons.leaderboard,
+                besedilo: 'Tedenska lestvica',
+                zaslon: const LestvicaScreen(),
               ),
             ],
           );

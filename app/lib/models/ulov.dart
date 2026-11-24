@@ -9,6 +9,9 @@ class Tocke {
 class Ulov {
   final String id;
   final String uid;
+
+  /// Ime ribiča ob vpisu (za lestvico). Starejši ulovi ga nimajo.
+  final String imeRibica;
   final String vrstaId;
   final String vrstaIme;
   final String? revirId;
@@ -25,6 +28,7 @@ class Ulov {
   const Ulov({
     required this.id,
     required this.uid,
+    this.imeRibica = '',
     required this.vrstaId,
     required this.vrstaIme,
     this.revirId,
@@ -42,6 +46,7 @@ class Ulov {
     return Ulov(
       id: doc.id,
       uid: d['uid'] as String? ?? '',
+      imeRibica: d['imeRibica'] as String? ?? '',
       vrstaId: d['vrstaId'] as String? ?? '',
       vrstaIme: d['vrstaIme'] as String? ?? '',
       revirId: d['revirId'] as String?,
@@ -53,5 +58,13 @@ class Ulov {
       spuscena: d['spuscena'] as bool? ?? false,
       datum: (d['datum'] as Timestamp?)?.toDate() ?? DateTime(2000),
     );
+  }
+
+  /// Za javni prikaz na lestvici: "Janez Novak" → "Janez N." (zasebnost).
+  String get javnoIme {
+    final deli = imeRibica.trim().split(RegExp(r'\s+'));
+    if (deli.isEmpty || deli.first.isEmpty) return 'Ribič';
+    if (deli.length == 1) return deli.first;
+    return '${deli.first} ${deli.last[0]}.';
   }
 }

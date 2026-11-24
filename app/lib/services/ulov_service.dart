@@ -49,6 +49,23 @@ class UlovService {
     });
   }
 
+  /// US-12: začetek tega tedna (ponedeljek ob 00:00, lokalni čas).
+  static DateTime zacetekTedna([DateTime? zdaj]) {
+    final z = zdaj ?? DateTime.now();
+    return DateTime(z.year, z.month, z.day - (z.weekday - 1));
+  }
+
+  /// US-12: vsi ulovi vseh ribičev od začetka tedna.
+  /// Poizvedba je samo po datumu (en sam indeks); filtriranje po reki in
+  /// razvrščanje po dolžini sta na napravi, zato ni potreben sestavljen indeks.
+  Stream<List<Ulov>> uloviTegaTedna() {
+    return _ulovi
+        .where('datum',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(zacetekTedna()))
+        .snapshots()
+        .map((s) => s.docs.map(Ulov.izFirestore).toList());
+  }
+
   /// Fotografijo kopira v zasebno mapo aplikacije in vrne pot do nje.
   Future<String> shraniFotografijo(XFile foto) async {
     final mapa = await getApplicationDocumentsDirectory();
@@ -69,6 +86,7 @@ class UlovService {
     required bool spuscena,
   }) async {
     final uid = _uid;
+    final user = FirebaseAuth.instance.currentUser!;
 
     // US-08: je to prvi ulov te vrste? Preverimo PRED zapisom.
     var novaKartica = false;
@@ -88,6 +106,7 @@ class UlovService {
     final batch = _db.batch();
     batch.set(_ulovi.doc(), {
       'uid': uid,
+      'imeRibica': user.displayName ?? '',
       'vrstaId': vrsta.id,
       'vrstaIme': vrsta.ime,
       'revirId': revir?.id,
