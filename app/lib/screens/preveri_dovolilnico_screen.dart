@@ -91,33 +91,15 @@ class _PreveriDovolilnicoScreenState extends State<PreveriDovolilnicoScreen> {
   void _naslednja() => setState(() => _rezultat = null);
 
   Future<void> _rocniVnos() async {
-    final ctrl = TextEditingController();
+    // Dialog ima svoj StatefulWidget, ki sam upravlja TextEditingController.
+    // (Če kontroler zavržemo takoj po zaprtju dialoga, ga še uporablja
+    // animacija zapiranja – to povzroči napako '_dependents.isEmpty'.)
     final vnos = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Številka dovolilnice'),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'npr. 3fK9aQ…',
-            helperText: 'Številka je pod QR kodo na ribičevem telefonu.',
-          ),
-          onSubmitted: (v) => Navigator.pop(ctx, v),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Prekliči')),
-          FilledButton(
-              onPressed: () => Navigator.pop(ctx, ctrl.text),
-              child: const Text('Preveri')),
-        ],
-      ),
+      builder: (_) => const _RocniVnosDialog(),
     );
-    ctrl.dispose();
     if (vnos != null && vnos.trim().isNotEmpty) {
-      _rezultat = null;
+      setState(() => _rezultat = null);
       await _preveri(vnos);
     }
   }
@@ -340,6 +322,50 @@ class _Podatek extends StatelessWidget {
           Expanded(child: Text(vrednost)),
         ],
       ),
+    );
+  }
+}
+
+/// Dialog za ročni vnos številke dovolilnice.
+class _RocniVnosDialog extends StatefulWidget {
+  const _RocniVnosDialog();
+
+  @override
+  State<_RocniVnosDialog> createState() => _RocniVnosDialogState();
+}
+
+class _RocniVnosDialogState extends State<_RocniVnosDialog> {
+  final _ctrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _ctrl.dispose(); // varno: klicano šele, ko je dialog res odstranjen
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Številka dovolilnice'),
+      content: TextField(
+        controller: _ctrl,
+        autofocus: true,
+        decoration: const InputDecoration(
+          hintText: 'npr. 3fK9aQ…',
+          helperText: 'Številka je pod QR kodo na ribičevem telefonu.',
+        ),
+        onSubmitted: (v) => Navigator.pop(context, v),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Prekliči'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _ctrl.text),
+          child: const Text('Preveri'),
+        ),
+      ],
     );
   }
 }
