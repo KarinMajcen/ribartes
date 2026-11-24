@@ -2,9 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
+import 'revirji_screen.dart';
 
-/// Domači zaslon – za zdaj pozdrav, točke, odjava (US-02) in
-/// gumbi za funkcije, ki jih dodamo v naslednjih korakih.
+/// Domači zaslon – pozdrav, točke, odjava (US-02) in
+/// vstop v glavne funkcije aplikacije.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -55,9 +56,13 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              _Gumb(ikona: Icons.water, besedilo: 'Revirji'),
-              _Gumb(ikona: Icons.qr_code, besedilo: 'Moje dovolilnice'),
-              _Gumb(ikona: Icons.photo_album, besedilo: 'Ribji album'),
+              _Gumb(
+                ikona: Icons.water,
+                besedilo: 'Revirji',
+                zaslon: const RevirjiScreen(),
+              ),
+              const _Gumb(ikona: Icons.qr_code, besedilo: 'Moje dovolilnice'),
+              const _Gumb(ikona: Icons.photo_album, besedilo: 'Ribji album'),
             ],
           );
         },
@@ -70,7 +75,10 @@ class _Gumb extends StatelessWidget {
   final IconData ikona;
   final String besedilo;
 
-  const _Gumb({required this.ikona, required this.besedilo});
+  /// Zaslon, ki se odpre ob tapu. Če ga še ni, se pokaže "kmalu".
+  final Widget? zaslon;
+
+  const _Gumb({required this.ikona, required this.besedilo, this.zaslon});
 
   @override
   Widget build(BuildContext context) {
@@ -79,9 +87,16 @@ class _Gumb extends StatelessWidget {
         leading: Icon(ikona),
         title: Text(besedilo),
         trailing: const Icon(Icons.chevron_right),
-        onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$besedilo – kmalu')),
-        ),
+        onTap: () {
+          if (zaslon != null) {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => zaslon!));
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('$besedilo – kmalu')),
+            );
+          }
+        },
       ),
     );
   }

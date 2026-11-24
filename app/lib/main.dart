@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
+import 'data/testni_podatki.dart';
 import 'firebase_options.dart';
 import 'screens/auth_gate.dart';
 
@@ -12,6 +14,15 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Samo med razvojem: če baza nima revirjev, vnese testne podatke.
+  if (kDebugMode) {
+    try {
+      await TestniPodatki.vnesiCeJePrazno();
+    } catch (e) {
+      debugPrint('Testnih podatkov ni bilo mogoče vnesti: $e');
+    }
+  }
 
   runApp(const RibartesApp());
 }
