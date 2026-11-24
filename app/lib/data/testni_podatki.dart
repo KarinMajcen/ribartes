@@ -1,27 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// TESTNI PODATKI za razvoj in zagovor.
-/// Cene in pravila so izmišljeni zgledi, ne uradni podatki ribiških družin.
+/// Cene, pravila in gostilne so izmišljeni zgledi, ne uradni podatki.
 ///
 /// Vnesejo se samo, če je zbirka "revirji" prazna, zato jih lahko
 /// v konzoli Firebase poljubno urejaš – ob naslednjem zagonu se ne prepišejo.
 class TestniPodatki {
+  /// Vsako zbirko napolni posebej, če je prazna (tako se nove zbirke,
+  /// npr. gostilne, dodajo tudi v bazo, ki že ima revirje).
   static Future<void> vnesiCeJePrazno() async {
+    await _vnesiZbirko('revirji', _revirji);
+    await _vnesiZbirko('vrste_rib', _vrsteRib);
+    await _vnesiZbirko('gostilne', _gostilne);
+  }
+
+  static Future<void> _vnesiZbirko(
+      String zbirka, List<Map<String, Object>> podatki) async {
     final db = FirebaseFirestore.instance;
-    final obstaja = await db.collection('revirji').limit(1).get();
+    final obstaja = await db.collection(zbirka).limit(1).get();
     if (obstaja.docs.isNotEmpty) return;
 
     final batch = db.batch();
-
-    for (final r in _revirji) {
-      final podatki = Map<String, dynamic>.from(r)..remove('id');
-      batch.set(db.collection('revirji').doc(r['id'] as String), podatki);
+    for (final p in podatki) {
+      final dokument = Map<String, dynamic>.from(p)..remove('id');
+      batch.set(db.collection(zbirka).doc(p['id'] as String), dokument);
     }
-    for (final v in _vrsteRib) {
-      final podatki = Map<String, dynamic>.from(v)..remove('id');
-      batch.set(db.collection('vrste_rib').doc(v['id'] as String), podatki);
-    }
-
     await batch.commit();
   }
 
@@ -115,5 +118,56 @@ class TestniPodatki {
     {'id': 'som', 'ime': 'som', 'latinsko': 'Silurus glanis'},
     {'id': 'krap', 'ime': 'krap', 'latinsko': 'Cyprinus carpio'},
     {'id': 'linj', 'ime': 'linj', 'latinsko': 'Tinca tinca'},
+  ];
+
+  static final List<Map<String, Object>> _gostilne = [
+    {
+      'id': 'pri-soci',
+      'ime': 'Gostilna Pri Soči',
+      'kraj': 'Tolmin',
+      'reka': 'Soča',
+      'revirId': 'soca-tolmin',
+      'opis': 'Družinska gostilna z vrtom tik ob reki.',
+      'ponudba': 'Postrv na žaru s krompirjem in blitvo',
+      'cenaPriprave': 12,
+      'odpreOb': 11,
+      'zapreOb': 21,
+    },
+    {
+      'id': 'bohinjski-kot',
+      'ime': 'Gostišče Bohinjski kot',
+      'kraj': 'Bohinj',
+      'reka': 'Sava Bohinjka',
+      'revirId': 'sava-bohinjka',
+      'opis': 'Planinsko gostišče s pogledom na jezero.',
+      'ponudba': 'Lipan v masleni omaki s polento',
+      'cenaPriprave': 14,
+      'odpreOb': 12,
+      'zapreOb': 20,
+    },
+    {
+      'id': 'ob-krki',
+      'ime': 'Gostilna Ob Krki',
+      'kraj': 'Žužemberk',
+      'reka': 'Krka',
+      'revirId': 'krka-zuzemberk',
+      'opis': 'Gostilna pod gradom z domačo kuhinjo.',
+      'ponudba': 'Ocvrta riba s krompirjevo solato',
+      'cenaPriprave': 11,
+      'odpreOb': 10,
+      'zapreOb': 22,
+    },
+    {
+      'id': 'domacija-kolpa',
+      'ime': 'Domačija Kolpa',
+      'kraj': 'Vinica',
+      'reka': 'Kolpa',
+      'revirId': 'kolpa-vinica',
+      'opis': 'Turistična kmetija ob kopališču na Kolpi.',
+      'ponudba': 'Riba v pečici z zelenjavo',
+      'cenaPriprave': 10,
+      'odpreOb': 11,
+      'zapreOb': 21,
+    },
   ];
 }

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
+import 'gostilne_screen.dart';
 import 'lestvica_screen.dart';
 import 'moje_dovolilnice_screen.dart';
 import 'preveri_dovolilnico_screen.dart';
@@ -98,6 +99,11 @@ class HomeScreen extends StatelessWidget {
                 ikona: Icons.leaderboard,
                 besedilo: 'Tedenska lestvica',
                 zaslon: const LestvicaScreen(),
+              ),
+              _Gumb(
+                ikona: Icons.restaurant,
+                besedilo: 'Ti ujameš, mi spečemo',
+                zaslon: const GostilneScreen(),
               ),
             ],
           );
