@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
+import 'moje_dovolilnice_screen.dart';
 import 'revirji_screen.dart';
 
 /// Domači zaslon – pozdrav, točke, odjava (US-02) in
@@ -61,7 +62,11 @@ class HomeScreen extends StatelessWidget {
                 besedilo: 'Revirji',
                 zaslon: const RevirjiScreen(),
               ),
-              const _Gumb(ikona: Icons.qr_code, besedilo: 'Moje dovolilnice'),
+              _Gumb(
+                ikona: Icons.qr_code,
+                besedilo: 'Moje dovolilnice',
+                zaslon: const MojeDovolilniceScreen(),
+              ),
               const _Gumb(ikona: Icons.photo_album, besedilo: 'Ribji album'),
             ],
           );

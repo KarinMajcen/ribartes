@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/revir.dart';
 import '../utils/format.dart';
+import 'nakup_screen.dart';
 
 /// Zaslon "Podrobnosti revirja" – pokriva US-04.
 class RevirDetailScreen extends StatelessWidget {
@@ -73,9 +74,8 @@ class RevirDetailScreen extends StatelessWidget {
             style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
             icon: const Icon(Icons.shopping_cart),
             label: const Text('Kupi dovolilnico'),
-            // US-05 (nakup) dodamo v naslednjem koraku.
-            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Nakup dovolilnice – kmalu')),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => NakupScreen(revir: revir)),
             ),
           ),
         ),
