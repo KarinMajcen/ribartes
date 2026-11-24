@@ -1,31 +1,11 @@
-# ‹Ime aplikacije›: funkcionalna specifikacija
-
-> **Kako uporabiti predlogo** (ta okvir pred oddajo pobrišite)
->
-> - Datoteko skopirajte v svoj repozitorij kot **`docs/SPECIFIKACIJA.md`**, slike zaslonov pa v mapo **`docs/img/`**. V `README.md` dodajte povezavo nanjo.
-> - Vse besedilo v znakih ‹ › zamenjajte s svojim. Diagrame pišete v Mermaidu, GitHub jih sam nariše. Urejevalnik v brskalniku: mermaid.live.
-> - Dokument dopolnjujete sproti. **Rok za oddajo: dan pred vašim zagovorom.** V e-učilnico oddate PDF (npr. VS Code z razširitvijo *Markdown PDF*) in povezavo na repozitorij.
-> - Opisujte **svojo** aplikacijo. Besedila, ki bi ga lahko prilepili v katerokoli specifikacijo, naj ne bo.
-> - Besede, kot so *hitro, enostavno, intuitivno, uporabniku prijazno, po potrebi, itd.*, zamenjajte s številko ali primerom. Zahteva, ki je ni mogoče preveriti, ni zahteva.
-> - Dokumentacija naj opisuje vašo dejansko aplikacijo. Razdelki, označeni s **(če velja)**, so obvezni le, če jih vaša aplikacija ima. Če ga nima, napišite en stavek, zakaj ne.
->
-> | Razdelek | Obvezen |
-> |---|---|
-> | 1 Uvod, 2 Funkcionalne zahteve, 3 Nefunkcionalne zahteve, 4 Uporabniški vmesnik | da |
-> | 5.1 Kontekst, 5.3 Plasti aplikacije | da |
-> | 5.2 Vsebniki | če velja: aplikacija ima strežnik ali zunanje storitve |
-> | 6 Podatkovni model | da, za vse podatke, ki jih aplikacija hrani |
-> | 7 Zunanji vmesniki | če velja: aplikacija uporablja zunanji API ali API naprave |
-> | 8.1 Sekvenčni diagram | da, vsaj en; z oddaljenimi podatki vsaj dva |
-> | 8.3 Stanja, 8.4 Algoritem | če velja |
-> | 9 Sledljivost, 10 Zgodovina sprememb | da |
+# RIBARTes – Lovim, torej sem: funkcionalna specifikacija
 
 | | |
 |---|---|
-| **Člani** | ‹Ime Priimek›, ‹Ime Priimek› |
-| **Repozitorij** | ‹https://github.com/…› |
-| **Platforma in orodja** | ‹npr. Android, Kotlin + Jetpack Compose / Android in iOS, Flutter› |
-| **Različica dokumenta** | ‹0.1›, ‹datum› |
+| **Člani** | Karin Majcen (63240198) |
+| **Repozitorij** | https://github.com/KarinMajcen/ribartes |
+| **Platforma in orodja** | Android in iOS, Flutter (Dart), Firebase Authentication, Cloud Firestore |
+| **Različica dokumenta** | 0.1, 24. 11. 2026 |
 
 ---
 
@@ -33,85 +13,366 @@
 
 ### 1.1 Namen
 
-‹Kateri problem aplikacija rešuje in za koga. Dva ali trije stavki.›
+Rekreativni ribič mora danes ribolovno dovolilnico kupiti pri ribiški družini ali na prodajnem mestu, jo nositi s seboj na papirju in ulov ročno vpisovati v dnevnik. RIBARTes združi nakup dovolilnice, elektronsko dovolilnico s QR kodo in dnevnik ulova v eno mobilno aplikacijo. Ribič tako dovolilnico kupi kadarkoli, tudi ob 5. uri zjutraj ob reki, čuvaj pa njeno veljavnost preveri s skeniranjem QR kode.
 
 ### 1.2 Uporabniki
 
 | Vloga | Opis |
 |---|---|
-| ‹vloga, npr. stanovalec› | ‹kdo je to in kaj želi doseči, en stavek› |
+| Ribič | Rekreativni ribič, ki želi hitro kupiti dovolilnico za izbrani revir in beležiti svoj ulov. |
+| Ribiški čuvaj | Nadzornik na revirju, ki želi na kraju preveriti, ali ima ribič veljavno dovolilnico. |
+| Gostilna (partner) | Gostilna ob reki, ki ribičem ponudi pripravo njihovega ulova. V tej različici le kot podatek v aplikaciji (glej Could). |
 
 ### 1.3 Obseg
 
 **Aplikacija omogoča:**
 
-- ‹…›
+- registracijo in prijavo ribiča z e-pošto in geslom,
+- pregled revirjev z vrstami rib, pravili in cenami ter iskanje po reki in vrsti ribe,
+- nakup dnevne, tedenske ali letne dovolilnice s simuliranim plačilom,
+- prikaz kupljenih dovolilnic s QR kodo in stanjem veljavnosti,
+- vpis ulova (vrsta, dolžina, teža, fotografija) in ribji album, v katerem se kartica vrste odklene ob prvem ulovu,
+- zbiranje točk za ribe, vrnjene v reko, in njihovo unovčenje kot popust pri dovolilnici,
+- preverjanje veljavnosti dovolilnice s skeniranjem QR kode (vloga čuvaj).
 
 **Izven obsega** (v tej različici aplikacija tega ne dela):
 
-- ‹…›
+- pravega plačila s kartico ali drugim plačilnim sredstvom; plačilo je simulirano,
+- urejanja revirjev, cen in pravil s strani ribiških družin; podatki so vneseni neposredno v bazo,
+- ločene aplikacije za gostilne in upravljanja rezervacij s strani gostiln,
+- izplačila nagrad sponzorjev.
 
 ### 1.4 Slovar pojmov
 
 | Pojem | Pomen v tej aplikaciji |
 |---|---|
-| ‹izraz, ki ima v vaši aplikaciji poseben pomen› | ‹…› |
+| Revir | Odsek reke ali jezera, ki ga upravlja ribiška družina in za katerega se kupi dovolilnica. |
+| Dovolilnica | Dovoljenje za ribolov na enem revirju za določeno obdobje (dnevna, tedenska, letna). |
+| Veljavnost | Obdobje od `veljaOd` do `veljaDo`, v katerem dovolilnica velja. |
+| Ulov | Zapis o ujeti ribi: vrsta, dolžina, teža, fotografija, revir, datum, ali je bila vrnjena v reko. |
+| Ribji album | Zbirka kartic vseh vrst rib. Kartica je zaklenjena, dokler ribič te vrste ne ujame prvič. |
+| Ujemi in spusti | Riba, ki jo ribič po ulovu vrne v reko. Zanjo prejme točke. |
+| Točke | Nagrada za ujemi in spusti, ki jo ribič unovči kot popust pri nakupu dovolilnice. |
+| Čuvaj | Ribiški nadzornik, ki preverja dovolilnice na revirju. |
 
 ---
 
 ## 2. Funkcionalne zahteve
 
-‹Vsaka funkcionalnost je ena uporabniška zgodba s svojo oznako (US-01, US-02 …). Zgodba opiše cilj uporabnika, ne posameznega gumba ali klika. Vsaka ima prioriteto in vsaj dva scenarija: enega uspešnega in enega robnega ali napačnega (prazen vnos, ni povezave, zavrnjeno dovoljenje). Ključne besede Given / When / Then ostanejo v angleščini, besedilo je v slovenščini. Če zgodba združuje več različnih ciljev uporabnika, jo razdelite na manjše.›
+**Prioritete (MoSCoW):** **Must**: brez tega aplikacija nima smisla, mora delovati na zagovoru. **Should**: pomembno, naredim, če je le mogoče. **Could**: dobrodošlo, če ostane čas. **Won't**: zavestno izpuščeno.
 
-**Prioritete (MoSCoW):** **Must**: brez tega aplikacija nima smisla, mora delovati na zagovoru. **Should**: pomembno, naredite, če je le mogoče. **Could**: dobrodošlo, če ostane čas. **Won't**: zavestno izpuščeno. Zgodbe Must so obvezni obseg in morajo delovati na zagovoru. Pri oceni upoštevamo tudi kakovost izvedbe, obravnavo napak in skladnost specifikacije z aplikacijo.
+### US-01: Registracija
 
-### US-01: ‹kratko ime›
+**Kot** ribič **želim** ustvariti račun z e-pošto in geslom, **da** so moje dovolilnice in ulovi shranjeni pod mojim imenom in dostopni z vsake naprave.
 
-**Kot** ‹vloga› **želim** ‹kaj›, **da** ‹zakaj›.
-
-**Prioriteta:** ‹Must / Should / Could›
+**Prioriteta:** Must
 
 ```gherkin
-Scenario: ‹uspešen primer›
-  Given ‹začetno stanje›
-  When ‹dejanje uporabnika›
-  Then ‹rezultat, ki ga je mogoče preveriti, npr. izpiše se »…«›
+Scenario: uspešna registracija
+  Given ribič je na zaslonu »Registracija«
+  And vnese ime »Janez Novak«, e-pošto »janez@primer.si« in geslo »ribolov123«
+  When tapne »Ustvari račun«
+  Then račun se ustvari
+  And odpre se »Domači zaslon« s pozdravom »Pozdravljen, Janez«
 
-Scenario: ‹robni ali napačen primer›
-  Given ‹…›
-  When ‹…›
-  Then ‹…›
+Scenario: e-pošta je že v uporabi
+  Given račun z e-pošto »janez@primer.si« že obstaja
+  And ribič je na zaslonu »Registracija«
+  When vnese e-pošto »janez@primer.si« in tapne »Ustvari račun«
+  Then račun se ne ustvari
+  And izpiše se »Račun s to e-pošto že obstaja.«
+
+Scenario: prekratko geslo
+  Given ribič je na zaslonu »Registracija«
+  When vnese geslo »abc« in tapne »Ustvari račun«
+  Then račun se ne ustvari
+  And izpiše se »Geslo mora imeti vsaj 6 znakov.«
 ```
 
-### US-02: ‹kratko ime›
+### US-02: Prijava in odjava
 
-‹…›
+**Kot** ribič **želim** se prijaviti v svoj račun in se iz njega odjaviti, **da** do mojih dovolilnic ne more dostopati nihče drug.
+
+**Prioriteta:** Must
+
+```gherkin
+Scenario: uspešna prijava
+  Given ribič ima račun z e-pošto »janez@primer.si«
+  And je na zaslonu »Prijava«
+  When vnese pravilno e-pošto in geslo ter tapne »Prijava«
+  Then odpre se »Domači zaslon«
+
+Scenario: napačno geslo
+  Given ribič je na zaslonu »Prijava«
+  When vnese napačno geslo in tapne »Prijava«
+  Then ostane na zaslonu »Prijava«
+  And izpiše se »Napačna e-pošta ali geslo.«
+
+Scenario: ni internetne povezave
+  Given naprava nima internetne povezave
+  When ribič tapne »Prijava«
+  Then izpiše se »Ni povezave. Preverite internet in poskusite znova.«
+
+Scenario: ostane prijavljen
+  Given ribič se je prijavil in zaprl aplikacijo
+  When aplikacijo ponovno odpre
+  Then takoj se odpre »Domači zaslon« brez ponovne prijave
+```
+
+### US-03: Pregled in iskanje revirjev
+
+**Kot** ribič **želim** videti seznam revirjev in ga filtrirati po reki in vrsti ribe, **da** hitro najdem revir, kjer lahko lovim ribo, ki me zanima.
+
+**Prioriteta:** Must
+
+```gherkin
+Scenario: prikaz seznama
+  Given v bazi je 5 revirjev
+  When ribič odpre zaslon »Revirji«
+  Then prikaže se 5 revirjev z imenom, reko in ceno dnevne dovolilnice
+
+Scenario: iskanje po vrsti ribe
+  Given ribič je na zaslonu »Revirji«
+  When v iskalno polje vpiše »lipan«
+  Then prikažejo se samo revirji, v katerih živi lipan
+
+Scenario: ni zadetkov
+  Given ribič je na zaslonu »Revirji«
+  When v iskalno polje vpiše »morski pes«
+  Then izpiše se »Ni revirjev, ki ustrezajo iskanju.«
+```
+
+### US-04: Podrobnosti revirja
+
+**Kot** ribič **želim** videti podrobnosti revirja (vrste rib, pravila, cene), **da** se pred nakupom prepričam, da revir ustreza mojemu načinu ribolova.
+
+**Prioriteta:** Must
+
+```gherkin
+Scenario: prikaz podrobnosti
+  Given ribič je na zaslonu »Revirji«
+  When tapne revir »Soča – Tolmin«
+  Then prikažejo se vrste rib, pravila revirja in cene dnevne, tedenske in letne dovolilnice
+  And prikaže se gumb »Kupi dovolilnico«
+```
+
+### US-05: Nakup dovolilnice
+
+**Kot** ribič **želim** za izbrani revir kupiti dnevno, tedensko ali letno dovolilnico za izbrani datum, **da** lahko ribarim zakonito, ne da bi moral na prodajno mesto.
+
+**Prioriteta:** Must
+
+```gherkin
+Scenario: uspešen nakup dnevne dovolilnice
+  Given ribič je na podrobnostih revirja »Soča – Tolmin«
+  When izbere vrsto »dnevna« in datum »28. 11. 2026«
+  And tapne »Plačaj« in potrdi simulirano plačilo
+  Then dovolilnica se shrani z veljavnostjo od 28. 11. 2026 00:00 do 28. 11. 2026 23:59
+  And odpre se zaslon z QR kodo nove dovolilnice
+
+Scenario: datum v preteklosti
+  Given ribič je na zaslonu »Nakup dovolilnice«
+  When izbere datum, ki je pred današnjim
+  Then gumb »Plačaj« je onemogočen
+  And izpiše se »Datum ne sme biti v preteklosti.«
+
+Scenario: ni povezave ob plačilu
+  Given naprava nima internetne povezave
+  When ribič tapne »Plačaj«
+  Then dovolilnica se ne ustvari
+  And izpiše se »Nakup ni uspel, ni povezave. Denar ni bil bremenjen.«
+```
+
+### US-06: Moje dovolilnice s QR kodo
+
+**Kot** ribič **želim** videti svoje dovolilnice s QR kodo in stanjem veljavnosti, **da** jo lahko pokažem čuvaju na revirju.
+
+**Prioriteta:** Must
+
+```gherkin
+Scenario: prikaz veljavne dovolilnice
+  Given ribič ima dovolilnico z veljavnostjo, ki vključuje današnji dan
+  When odpre »Moje dovolilnice«
+  Then dovolilnica je na vrhu seznama z oznako »Veljavna«
+  And ob tapu se prikaže njena QR koda čez cel zaslon
+
+Scenario: potekla dovolilnica
+  Given ribič ima dovolilnico, ki je potekla včeraj
+  When odpre »Moje dovolilnice«
+  Then dovolilnica je prikazana pod »Zgodovina« z oznako »Potekla«
+
+Scenario: brez povezave
+  Given ribič je dovolilnice že enkrat odprl z internetno povezavo
+  And naprava zdaj nima povezave
+  When odpre »Moje dovolilnice«
+  Then prikažejo se zadnje naložene dovolilnice z QR kodo
+```
+
+### US-07: Vpis ulova
+
+**Kot** ribič **želim** vpisati ulov z vrsto, dolžino, težo in fotografijo, **da** imam pregled nad svojimi ulovi in dokaz o ujeti ribi.
+
+**Prioriteta:** Must
+
+```gherkin
+Scenario: uspešen vpis ulova
+  Given ribič je na zaslonu »Nov ulov«
+  When izbere vrsto »soška postrv«, vpiše dolžino 42 cm in težo 0,9 kg
+  And fotografira ribo in tapne »Shrani«
+  Then ulov se shrani z današnjim datumom
+  And prikaže se v seznamu ulovov
+
+Scenario: manjka vrsta ribe
+  Given ribič je na zaslonu »Nov ulov«
+  And vrsta ribe ni izbrana
+  When tapne »Shrani«
+  Then ulov se ne shrani
+  And izpiše se »Izberite vrsto ribe.«
+
+Scenario: zavrnjeno dovoljenje za kamero
+  Given ribič na zaslonu »Nov ulov« tapne »Dodaj fotografijo«
+  When dovoljenje za kamero zavrne
+  Then izpiše se »Brez dovoljenja za kamero fotografije ni mogoče dodati.«
+  And ulov lahko shrani brez fotografije
+```
+
+### US-08: Ribji album
+
+**Kot** ribič **želim** zbirko kartic vseh slovenskih vrst rib, ki se odklenejo ob prvem ulovu, **da** imam cilj in motivacijo za ribolov na različnih revirjih.
+
+**Prioriteta:** Must
+
+```gherkin
+Scenario: odklep nove kartice
+  Given ribič še ni ujel nobene soške postrvi
+  When shrani ulov vrste »soška postrv«
+  Then izpiše se »Nova kartica: soška postrv!«
+  And v »Ribjem albumu« je kartica soške postrvi odklenjena
+
+Scenario: prikaz napredka
+  Given v bazi je 15 vrst rib
+  And ribič je ujel 4 različne vrste
+  When odpre »Ribji album«
+  Then prikaže se »Zbranih 4 / 15«
+  And 11 kartic je prikazanih kot zaklenjenih (siva silhueta)
+```
+
+### US-09: Točke ujemi in spusti
+
+**Kot** ribič **želim** za vsako ribo, ki jo vrnem v reko, prejeti točke, **da** sem nagrajen za trajnostni ribolov.
+
+**Prioriteta:** Should
+
+```gherkin
+Scenario: točke za spuščeno ribo
+  Given ribič ima 30 točk
+  When vpiše ulov in označi »Vrnjena v reko«
+  Then ribič ima 40 točk
+  And izpiše se »+10 točk za ujemi in spusti!«
+
+Scenario: riba ni vrnjena
+  Given ribič ima 30 točk
+  When vpiše ulov brez oznake »Vrnjena v reko«
+  Then ribič ima še vedno 30 točk
+```
+
+### US-10: Popust s točkami
+
+**Kot** ribič **želim** pri nakupu dovolilnice unovčiti točke kot popust, **da** imam od zbranih točk konkreten prihranek.
+
+**Prioriteta:** Should
+
+```gherkin
+Scenario: unovčenje točk
+  Given ribič ima 250 točk
+  And dnevna dovolilnica stane 25,00 €
+  When na zaslonu »Nakup dovolilnice« vklopi »Unovči točke«
+  Then cena se zniža na 23,00 €
+  And po nakupu ima ribič 50 točk
+
+Scenario: premalo točk
+  Given ribič ima 60 točk
+  When odpre zaslon »Nakup dovolilnice«
+  Then stikalo »Unovči točke« je onemogočeno
+  And izpiše se »Za popust potrebujete vsaj 100 točk.«
+```
+
+### US-11: Preverjanje dovolilnice (čuvaj)
+
+**Kot** ribiški čuvaj **želim** skenirati QR kodo na ribičevem telefonu, **da** takoj vidim, ali ima veljavno dovolilnico za ta revir.
+
+**Prioriteta:** Should
+
+```gherkin
+Scenario: veljavna dovolilnica
+  Given čuvaj je na zaslonu »Preveri dovolilnico«
+  When skenira QR kodo dovolilnice, ki velja danes
+  Then prikaže se zeleno sporočilo »Veljavna« z imenom ribiča, revirjem in datumom veljavnosti
+
+Scenario: potekla dovolilnica
+  Given čuvaj je na zaslonu »Preveri dovolilnico«
+  When skenira QR kodo dovolilnice, ki je potekla
+  Then prikaže se rdeče sporočilo »Ni veljavna – potekla 27. 11. 2026«
+
+Scenario: neznana koda
+  Given čuvaj je na zaslonu »Preveri dovolilnico«
+  When skenira QR kodo, ki ni dovolilnica RIBARTes
+  Then prikaže se »Neznana koda«
+```
+
+### US-12: Tedenska lestvica
+
+**Kot** ribič **želim** videti lestvico največjih ulovov tega tedna po rekah, **da** se lahko primerjam z drugimi ribiči.
+
+**Prioriteta:** Could
+
+```gherkin
+Scenario: prikaz lestvice
+  Given ta teden je bilo na Soči vpisanih 8 ulovov
+  When ribič odpre »Lestvica« in izbere reko »Soča«
+  Then prikaže se 8 ulovov, razvrščenih po dolžini od največje do najmanjše
+
+Scenario: ni ulovov
+  Given ta teden na Krki ni bilo vpisanih ulovov
+  When ribič izbere reko »Krka«
+  Then izpiše se »Ta teden še ni ulovov. Bodi prvi!«
+```
+
+### US-13: Rezervacija priprave ulova v gostilni
+
+**Kot** ribič **želim** v partnerski gostilni ob reki rezervirati pripravo svojega ulova, **da** ga lahko pojem sveže pripravljenega takoj po ribolovu.
+
+**Prioriteta:** Could
+
+```gherkin
+Scenario: uspešna rezervacija
+  Given ribič je na zaslonu »Gostilne«
+  When izbere gostilno »Pri Soči«, uro 13:00 in tapne »Rezerviraj«
+  Then rezervacija se shrani
+  And izpiše se »Rezervacija potrjena za 13:00.«
+
+Scenario: ura v preteklosti
+  Given ura je 14:00
+  When ribič izbere uro 13:00 za danes
+  Then gumb »Rezerviraj« je onemogočen
+```
 
 ### Won't (zavestno izpuščeno)
 
-- ‹funkcionalnost›: ‹zakaj ne v tej različici›
+- Pravo plačilo (kartica, Apple Pay, Google Pay): zahteva pogodbo s plačilnim ponudnikom in varnostni pregled, kar presega obseg seminarske naloge. Plačilo je simulirano.
+- Upravljanje revirjev za ribiške družine: zahteva ločeno vlogo in skrbniški vmesnik. Revirji so vneseni neposredno v bazo.
+- Nagrade sponzorjev za zmagovalca tedna: zahteva dogovore s sponzorji.
+- Aplikacija za gostilne (sprejem in potrjevanje rezervacij): ločena aplikacija.
 
 ---
 
 ## 3. Nefunkcionalne zahteve
 
-‹Kategorije po ISO/IEC 25010, izberite tiste, ki so za vašo aplikacijo pomembne. Vsaka zahteva mora biti merljiva. Ne »aplikacija je hitra«, ampak »seznam 100 elementov se prikaže v manj kot 1 s na emulatorju Pixel 8«: pri zmogljivosti vedno navedite napravo in pogoje merjenja. Varnost opišite s kategorijami OWASP MASVS (STORAGE, NETWORK, AUTH, PRIVACY …), ki veljajo za vašo aplikacijo. Če aplikacija uporablja oddaljene podatke, zapišite, kaj se zgodi brez omrežja.›
-
-| Oznaka | Kategorija | Zahteva | Kako preverimo |
-|---|---|---|---|
-| NFR-01 | ‹Zmogljivost› | ‹…› | ‹…› |
-| NFR-02 | ‹Varnost (MASVS-NETWORK)› | ‹npr. vsa komunikacija s strežnikom poteka prek HTTPS› | ‹…› |
-| NFR-03 | ‹Dostopnost› | ‹npr. vse dotikalne površine so velike vsaj 48 × 48 dp (Android) oziroma 44 × 44 pt (iOS)› | ‹…› |
-| NFR-04 | ‹Združljivost› | ‹najnižja različica Androida / iOS› | ‹…› |
-| NFR-05 | ‹Zanesljivost› | ‹npr. brez povezave aplikacija prikaže zadnje naložene podatke in sporočilo »Ni povezave«› | ‹…› |
+‹dopolnimo kasneje›
 
 ### 3.1 Osebni podatki in dovoljenja
 
-‹Vsi osebni podatki, ki jih aplikacija zbira (lokacija, fotografije, e-pošta …), in vsa dovoljenja. Dovoljenje zahtevajte takrat, ko ga uporabnik potrebuje, ne ob prvem zagonu. Kaj se zgodi, če ga uporabnik zavrne, zapišite kot robni scenarij pri zgodbi.›
-
-| Podatek ali dovoljenje | Zakaj ga potrebujemo | Kdaj ga zahtevamo | Kje je shranjen |
-|---|---|---|---|
-| ‹npr. lokacija› | ‹…› | ‹…› | ‹…› |
+‹dopolnimo kasneje›
 
 ---
 
@@ -119,21 +380,11 @@ Scenario: ‹robni ali napačen primer›
 
 ### 4.1 Tok zaslonov
 
-```mermaid
-flowchart LR
-    A[‹Zaslon 1›] -->|‹dejanje›| B[‹Zaslon 2›]
-    B -->|‹dejanje›| A
-```
+‹dopolnimo kasneje›
 
 ### 4.2 Zasloni
 
-‹Za vsak zaslon en podrazdelek s skico (wireframe). Ni treba, da je lepa, jasno pa mora biti, kateri elementi so na zaslonu. Orodja: Figma, Excalidraw, Penpot ali papir in fotografija. Upoštevajte Material Design (Android) oziroma Human Interface Guidelines (iOS).›
-
-#### ‹Ime zaslona›
-
-‹Skico shranite v `docs/img/` in to vrstico zamenjajte z: `![Ime zaslona](img/ime-datoteke.png)`›
-
-‹Kaj uporabnik tu počne.› **Pokriva:** ‹US-01, US-02›
+‹dopolnimo kasneje›
 
 ---
 
@@ -141,160 +392,67 @@ flowchart LR
 
 ### 5.1 Kontekst (C4, raven 1)
 
-‹Vaša aplikacija kot ena škatla, okrog nje uporabniki in zunanji sistemi.›
+‹dopolnimo kasneje›
 
-```mermaid
-flowchart TB
-    U([‹Vloga›]) -->|‹kaj počne›| APP[‹Ime aplikacije›<br/>mobilna aplikacija]
-    APP -->|‹HTTPS / JSON›| EXT[‹Zunanji sistem, npr. Firebase ali API›]
-```
+### 5.2 Vsebniki (C4, raven 2)
 
-### 5.2 Vsebniki (C4, raven 2) (če velja)
-
-‹Iz česa je sistem sestavljen: mobilna aplikacija, strežnik, baza, zunanje storitve, in kako se povezujejo. Notranjost aplikacije sodi v 5.3. Če nimate strežnika, to napišite.›
-
-```mermaid
-flowchart LR
-    APP[‹Ime aplikacije›<br/>‹Flutter / Compose›] -->|‹HTTPS / JSON›| SRV[‹Strežnik ali storitev›]
-    SRV --> DB[(‹Baza›)]
-    APP --> LDB[(‹Lokalna shramba na napravi›)]
-    APP -->|‹HTTPS›| EXT[‹Zunanji API›]
-```
+‹dopolnimo kasneje›
 
 ### 5.3 Plasti aplikacije
 
-‹Kako je razdeljena koda. Google priporoča: uporabniški vmesnik → ViewModel (stanje zaslona) → repozitorij → viri podatkov. Enako velja za Flutter, le imena so drugačna. V enem odstavku napišite, katere knjižnice uporabljate za posamezno plast.›
-
-```mermaid
-flowchart LR
-    UI[‹Zasloni›] --> VM[‹ViewModel / stanje›]
-    VM --> R[‹Repozitorij›]
-    R --> L[(‹Lokalni vir, npr. Room / shared_preferences›)]
-    R --> N[‹Oddaljeni vir, npr. Firestore / http›]
-```
+‹dopolnimo kasneje›
 
 ---
 
 ## 6. Podatkovni model
 
-‹Vse entitete, ki jih aplikacija hrani, in povezave med njimi. Za relacijsko bazo (Room, SQLite) narišite ER diagram, kot je spodaj. Za dokumentno bazo (Firestore) ali preprosto shrambo (shared_preferences, datoteke) pokažite zbirke in obliko dokumenta, npr. s primerom JSON. Diagram ER lahko uporabite tudi tu, entitete so takrat zbirke.›
-
-```mermaid
-erDiagram
-    ENTITETA_A ||--o{ ENTITETA_B : "‹povezava›"
-    ENTITETA_A {
-        string id PK
-        string ime
-    }
-    ENTITETA_B {
-        string id PK
-        string entitetaAId FK
-    }
-```
-
-### ‹Entiteta›
-
-| Atribut | Tip | Obvezen | Opis |
-|---|---|---|---|
-| ‹id› | ‹string› | da | ‹…› |
-
-**Hramba:** ‹kje so podatki: samo na napravi, samo na strežniku ali na obeh. Če na obeh: kateri vir je glavni in kaj se zgodi ob konfliktu.›
+‹dopolnimo kasneje›
 
 ---
 
-## 7. Zunanji vmesniki (če velja)
+## 7. Zunanji vmesniki
 
-‹Za vsak zunanji sistem en podrazdelek (7.1, 7.2 …). API-ji naprave so zadnji podrazdelek. Če imate lasten strežnik, njegov API opišite v `docs/openapi.yaml` in se tu nanj sklicujte.›
-
-### 7.1 ‹Ime API-ja›
-
-| | |
-|---|---|
-| **Namen** | ‹…› |
-| **Dokumentacija** | ‹povezava› |
-| **Avtentikacija** | ‹brez / API ključ / OAuth 2.0› |
-| **Omejitve** | ‹npr. največ N zahtev na minuto› |
-
-**Zahteva:**
-
-```http
-GET ‹https://…›
-```
-
-**Odgovor** (samo polja, ki jih uporabljamo):
-
-```json
-{
-  "‹polje›": "‹vrednost›"
-}
-```
-
-**Napake:** ‹kaj aplikacija stori ob napaki 4xx / 5xx, prekoračenem času ali brez povezave›
-
-### API-ji naprave
-
-| API | Dovoljenje | Za kaj |
-|---|---|---|
-| ‹kamera› | ‹CAMERA› | ‹…› |
+‹dopolnimo kasneje›
 
 ---
 
 ## 8. Dinamika
 
-### 8.1 ‹Ime poteka›
+### 8.1 Nakup dovolilnice
 
-‹Sekvenčni diagram za najpomembnejši potek v aplikaciji. Če aplikacija uporablja oddaljene podatke, narišite vsaj dva, npr. oddajo podatkov in prijavo uporabnika. Kjer je napaka mogoča (ni povezave, strežnik vrne napako), jo diagram pokaže.›
+‹dopolnimo kasneje›
 
-```mermaid
-sequenceDiagram
-    actor U as ‹Vloga›
-    participant A as Aplikacija
-    participant S as ‹Strežnik›
-    U->>A: ‹dejanje›
-    A->>S: ‹zahteva›
-    alt uspeh
-        S-->>A: ‹odgovor›
-        A-->>U: ‹kaj vidi uporabnik›
-    else napaka
-        S-->>A: ‹napaka›
-        A-->>U: ‹sporočilo o napaki›
-    end
-```
+### 8.2 Prijava uporabnika
 
-### 8.2 ‹Ime drugega poteka› (če velja)
+‹dopolnimo kasneje›
 
-‹Drugi sekvenčni diagram.›
+### 8.3 Stanja: dovolilnica
 
-### 8.3 Stanja: ‹objekt› (če velja)
+‹dopolnimo kasneje›
 
-‹Diagram stanj za vsak objekt, ki ima statuse (naročilo, rezervacija, prijava …).›
+### 8.4 Algoritem: točke in popust
 
-```mermaid
-stateDiagram-v2
-    [*] --> ‹Stanje1›
-    ‹Stanje1› --> ‹Stanje2› : ‹dogodek›
-    ‹Stanje2› --> [*]
-```
-
-### 8.4 Algoritem: ‹ime› (če velja)
-
-‹Vsako netrivialno pravilo ali izračun.›
-
-- **Vhod:** ‹podatki, s tipi in enotami›
-- **Izhod:** ‹rezultat, s tipom in enoto›
-- **Pravilo:** ‹formula ali psevdokoda›
-- **Robni primeri:** ‹prazni podatki, deljenje z 0, ni lokacije …›
-- **Primer:** ‹izračun z dejanskimi številkami›
+‹dopolnimo kasneje›
 
 ---
 
 ## 9. Sledljivost
 
-‹Tabelo posodabljajte med razvojem. Na zagovoru po njej pregledamo, kaj deluje. Zgodba je »narejena« šele, ko so njeni scenariji preverjeni.›
-
 | Zgodba | Prioriteta | Zasloni | Preverjanje | Stanje |
 |---|---|---|---|---|
-| US-01 | ‹Must› | ‹…› | ‹ročni test po scenarijih / avtomatski test / demonstracija na zagovoru› | ‹načrtovano / v delu / narejeno› |
+| US-01 Registracija | Must | Registracija | ročni test po scenarijih | načrtovano |
+| US-02 Prijava in odjava | Must | Prijava, Profil | ročni test po scenarijih | načrtovano |
+| US-03 Pregled in iskanje revirjev | Must | Revirji | ročni test po scenarijih | načrtovano |
+| US-04 Podrobnosti revirja | Must | Podrobnosti revirja | ročni test po scenarijih | načrtovano |
+| US-05 Nakup dovolilnice | Must | Nakup dovolilnice | ročni test po scenarijih | načrtovano |
+| US-06 Moje dovolilnice s QR kodo | Must | Moje dovolilnice, QR koda | ročni test po scenarijih | načrtovano |
+| US-07 Vpis ulova | Must | Nov ulov | ročni test po scenarijih | načrtovano |
+| US-08 Ribji album | Must | Ribji album | ročni test po scenarijih | načrtovano |
+| US-09 Točke ujemi in spusti | Should | Nov ulov, Profil | ročni test po scenarijih | načrtovano |
+| US-10 Popust s točkami | Should | Nakup dovolilnice | ročni test po scenarijih | načrtovano |
+| US-11 Preverjanje dovolilnice | Should | Preveri dovolilnico | demonstracija na zagovoru | načrtovano |
+| US-12 Tedenska lestvica | Could | Lestvica | ročni test po scenarijih | načrtovano |
+| US-13 Rezervacija v gostilni | Could | Gostilne | ročni test po scenarijih | načrtovano |
 
 ---
 
@@ -302,23 +460,4 @@ stateDiagram-v2
 
 | Različica | Datum | Spremembe |
 |---|---|---|
-| 0.1 | ‹datum› | Prva različica |
-
----
-
-## Kontrolni seznam pred oddajo
-
-‹Pred oddajo preverite in nato ta razdelek pobrišite.›
-
-- [ ] Dokument je v repozitoriju kot `docs/SPECIFIKACIJA.md`, repozitorij je javen, `README.md` kaže nanj.
-- [ ] Uvod ima vloge, obseg in seznam »izven obsega«.
-- [ ] Vsaka zgodba ima oznako, del »da …«, prioriteto MoSCoW in vsaj dva scenarija Given / When / Then.
-- [ ] Nefunkcionalne zahteve so merljive in vključujejo varnost, zasebnost in dovoljenja.
-- [ ] Vsak zaslon ima skico in seznam zgodb, ki jih pokriva.
-- [ ] Diagram konteksta C4 in diagram plasti aplikacije. Diagram vsebnikov, če ima aplikacija strežnik ali zunanje storitve.
-- [ ] Podatkovni model (ER diagram ali shema dokumentov) in tabela atributov za vsako entiteto. Jasno je, kje so podatki shranjeni.
-- [ ] Vsak zunanji API ima primer zahteve in odgovora ter opis napak. Lasten strežnik: `docs/openapi.yaml`.
-- [ ] Vsaj en sekvenčni diagram, z oddaljenimi podatki vsaj dva. Diagram stanj za objekte s statusi, algoritmi z vhodom, izhodom, pravilom in primerom.
-- [ ] Razdelki »(če velja)«, ki jih aplikacija nima, imajo en stavek, zakaj ne.
-- [ ] Tabela sledljivosti je posodobljena s trenutnim stanjem aplikacije.
-- [ ] Diagrami se na GitHubu pravilno izrišejo.
+| 0.1 | 24. 11. 2026 | Prva različica: uvod, uporabniške zgodbe, sledljivost |
