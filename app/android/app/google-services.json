@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "82891348295",
+    "project_id": "ribartes",
+    "storage_bucket": "ribartes.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:82891348295:android:5602dd2a100900fdcbd462",
+        "android_client_info": {
+          "package_name": "si.ribartes.ribartes"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAC8qBDWJC0XYBTh5n_h5buSr9LL6SHFas"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
