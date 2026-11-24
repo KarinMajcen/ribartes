@@ -87,6 +87,13 @@ class _Vsebina extends StatelessWidget {
                 title: const Text('Velja do'),
                 trailing: Text('${formatDatum(d.veljaDo)}, 23:59'),
               ),
+              if (d.popust > 0)
+                ListTile(
+                  leading: const Icon(Icons.stars),
+                  title: const Text('Popust s točkami'),
+                  subtitle: Text('Porabljenih ${d.porabljeneTocke} točk'),
+                  trailing: Text('−${formatCena(d.popust)}'),
+                ),
               ListTile(
                 leading: const Icon(Icons.euro),
                 title: const Text('Plačano'),
@@ -96,7 +103,8 @@ class _Vsebina extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
+        // SelectableText: številko je mogoče kopirati (ročni vnos pri čuvaju).
+        SelectableText(
           'Številka: ${d.id}',
           textAlign: TextAlign.center,
           style: besedilo.bodySmall,

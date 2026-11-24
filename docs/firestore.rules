@@ -1,0 +1,54 @@
+rules_version = '2';
+
+// Varnostna pravila za RIBARTes (specifikacija, NFR-07 in NFR-08).
+// Načelo: privzeto je vse prepovedano; dovolimo samo, kar aplikacija potrebuje.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function prijavljen() {
+      return request.auth != null;
+    }
+
+    function jeLastnik(uid) {
+      return prijavljen() && request.auth.uid == uid;
+    }
+
+    function jeCuvaj() {
+      return prijavljen() &&
+        get(/databases/$(database)/documents/uporabniki/$(request.auth.uid)).data.vloga == 'cuvaj';
+    }
+
+    // Profil: bere in ureja ga samo lastnik. Vloge si ribič ne more sam spremeniti.
+    match /uporabniki/{uid} {
+      allow read: if jeLastnik(uid);
+      allow create: if jeLastnik(uid) && request.resource.data.vloga == 'ribic';
+      allow update: if jeLastnik(uid) && request.resource.data.vloga == resource.data.vloga;
+      allow delete: if false;
+    }
+
+    // Revirji in vrste rib: samo branje. Urejanje je izven obsega (Won't).
+    match /revirji/{id} {
+      allow read: if prijavljen();
+      allow write: if false;
+    }
+    match /vrste_rib/{id} {
+      allow read: if prijavljen();
+      allow write: if false;
+    }
+
+    // Dovolilnice: ribič ustvari in bere svoje; čuvaj bere vse (US-11).
+    // Po nakupu dovolilnice ni mogoče spremeniti (npr. podaljšati veljavnosti).
+    match /dovolilnice/{id} {
+      allow read: if jeLastnik(resource.data.uid) || jeCuvaj();
+      allow create: if jeLastnik(request.resource.data.uid);
+      allow update, delete: if false;
+    }
+
+    // Ulovi: ribič ustvari, bere, ureja in briše samo svoje.
+    match /ulovi/{id} {
+      allow read: if jeLastnik(resource.data.uid);
+      allow create: if jeLastnik(request.resource.data.uid);
+      allow update, delete: if jeLastnik(resource.data.uid);
+    }
+  }
+}

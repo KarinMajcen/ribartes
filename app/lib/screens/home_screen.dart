@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
 import 'moje_dovolilnice_screen.dart';
+import 'preveri_dovolilnico_screen.dart';
 import 'revirji_screen.dart';
 import 'ribji_album_screen.dart';
 
@@ -38,6 +39,8 @@ class HomeScreen extends StatelessWidget {
           final ime = (podatki?['ime'] as String?) ?? '';
           final prvoIme = ime.split(' ').first;
           final tocke = (podatki?['tocke'] as num?)?.toInt() ?? 0;
+          // Vlogo "cuvaj" nastavi upravljavec v bazi; ribič si je ne more sam.
+          final jeCuvaj = podatki?['vloga'] == 'cuvaj';
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -47,6 +50,23 @@ class HomeScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 16),
+              if (jeCuvaj) ...[
+                Card(
+                  color: Theme.of(context).colorScheme.tertiaryContainer,
+                  child: ListTile(
+                    leading: const Icon(Icons.qr_code_scanner, size: 36),
+                    title: const Text('Preveri dovolilnico'),
+                    subtitle: const Text('Vloga: ribiški čuvaj'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const PreveriDovolilnicoScreen(),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
               Card(
                 child: ListTile(
                   leading: const Icon(Icons.stars),
