@@ -6,15 +6,15 @@ import 'package:material_ui/material_ui.dart';
 List<Color> barveReke(String reka) {
   switch (reka.toLowerCase()) {
     case 'soča':
-      return const [Color(0xFF2BB5A0), Color(0xFF0E7C6B)]; // smaragdna
+      return const [Color(0xFF3FA796), Color(0xFF0E7C6B)]; // smaragdna
     case 'sava bohinjka':
-      return const [Color(0xFF5FA8D3), Color(0xFF1F5F8B)]; // alpsko modra
+      return const [Color(0xFF6FA3C2), Color(0xFF2E6A8E)]; // alpsko modra
     case 'krka':
-      return const [Color(0xFF8DB062), Color(0xFF3F6B2A)]; // zelena
+      return const [Color(0xFF86A36B), Color(0xFF4C6B3A)]; // zelena
     case 'kolpa':
-      return const [Color(0xFF45B7BC), Color(0xFF147A80)]; // topla turkizna
+      return const [Color(0xFF5BAFA8), Color(0xFF2A7F7A)]; // topla turkizna
     case 'ljubljanica':
-      return const [Color(0xFF94A374), Color(0xFF4B5A35)]; // močvirsko olivna
+      return const [Color(0xFF99A383), Color(0xFF5C664C)]; // močvirsko olivna
     default:
       return const [Color(0xFF2BB5A0), Color(0xFF0D3B36)];
   }

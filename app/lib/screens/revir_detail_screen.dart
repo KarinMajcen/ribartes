@@ -128,8 +128,6 @@ class RevirDetailScreen extends StatelessWidget {
           child: FilledButton.icon(
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(52),
-              backgroundColor: barveReke(revir.reka).last,
-              foregroundColor: Colors.white,
             ),
             icon: const Icon(Icons.shopping_cart),
             label: const Text('Kupi dovolilnico'),

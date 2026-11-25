@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../models/revir.dart';
 import '../services/revir_service.dart';
+import '../tema/tema.dart';
 import '../utils/format.dart';
 import '../widgets/reka_glava.dart';
 import 'revir_detail_screen.dart';
@@ -77,7 +78,7 @@ class _RevirjiScreenState extends State<RevirjiScreen> {
                 return ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                   itemCount: revirji.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, __) => const SizedBox(height: Razmik.s),
                   itemBuilder: (context, i) => _RevirKartica(revirji[i]),
                 );
               },
@@ -89,15 +90,22 @@ class _RevirjiScreenState extends State<RevirjiScreen> {
   }
 }
 
+/// Vrstica revirja: barvni "kamenček" reke, ime, kraj in vrste rib, cena desno.
+/// Barva je le majhen poudarek, ki loči reke; ostalo je mirno in berljivo.
 class _RevirKartica extends StatelessWidget {
   final Revir revir;
   const _RevirKartica(this.revir);
 
+  String get _vrste {
+    final prve = revir.vrste.take(3).join(', ');
+    final ostale = revir.vrste.length - 3;
+    return ostale > 0 ? '$prve in še $ostale' : prve;
+  }
+
   @override
   Widget build(BuildContext context) {
     final besedilo = Theme.of(context).textTheme;
-    final prikaz = revir.vrste.take(3).toList();
-    final preostale = revir.vrste.length - prikaz.length;
+    final barve = Theme.of(context).colorScheme;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -106,92 +114,61 @@ class _RevirKartica extends StatelessWidget {
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => RevirDetailScreen(revir: revir)),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Barvna glava – ob tapu se razširi v glavo zaslona s podrobnostmi.
-            Hero(
-              tag: 'revir-${revir.id}',
-              child: RekaGlava(
-                reka: revir.reka,
-                visina: 72,
-                otrok: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.water, color: Colors.white),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          revir.reka.toUpperCase(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          'od ${formatCena(revir.cenaDnevna)}',
-                          style: TextStyle(
-                            color: barveReke(revir.reka).last,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
+        child: Padding(
+          padding: const EdgeInsets.all(Razmik.m),
+          child: Row(
+            children: [
+              // Kamenček v barvi reke – ob tapu se razširi v glavo podrobnosti.
+              SizedBox(
+                width: 60,
+                height: 60,
+                child: Hero(
+                  tag: 'revir-${revir.id}',
+                  child: RekaGlava(
+                    reka: revir.reka,
+                    visina: 60,
+                    zaobljenost: BorderRadius.circular(Zaobljenost.gumb),
+                    otrok: const Center(
+                      child: Icon(Icons.phishing,
+                          color: Colors.white, size: 26),
+                    ),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(width: Razmik.m),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(revir.ime, style: besedilo.titleMedium),
+                    const SizedBox(height: 2),
+                    Text(revir.ribiskaDruzina, style: besedilo.bodySmall),
+                    const SizedBox(height: 2),
+                    Text(
+                      _vrste,
+                      style: besedilo.bodySmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: Razmik.s),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(revir.ime, style: besedilo.titleMedium),
-                  Text(revir.ribiskaDruzina, style: besedilo.bodySmall),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: [
-                      for (final v in prikaz) _Oznaka(v),
-                      if (preostale > 0) _Oznaka('+$preostale'),
-                    ],
+                  Text(
+                    formatCena(revir.cenaDnevna),
+                    style: besedilo.titleMedium
+                        ?.copyWith(color: barve.primary),
                   ),
+                  Text('na dan', style: besedilo.bodySmall),
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    );
-  }
-}
-
-class _Oznaka extends StatelessWidget {
-  final String besedilo;
-  const _Oznaka(this.besedilo);
-
-  @override
-  Widget build(BuildContext context) {
-    final barve = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: barve.secondaryContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(besedilo,
-          style: TextStyle(fontSize: 12, color: barve.onSecondaryContainer)),
     );
   }
 }
