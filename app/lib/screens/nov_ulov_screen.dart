@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +10,7 @@ import '../models/ulov.dart';
 import '../models/vrsta_ribe.dart';
 import '../services/revir_service.dart';
 import '../services/ulov_service.dart';
+import '../widgets/ribji_konfeti.dart';
 
 /// Zaslon "Nov ulov" – pokriva US-07 (in US-09: ujemi in spusti).
 class NovUlovScreen extends StatefulWidget {
@@ -84,12 +86,27 @@ class _NovUlovScreenState extends State<NovUlovScreen> {
       );
       if (!mounted) return;
 
-      // US-08: prvi ulov te vrste odklene kartico.
+      // US-08: prvi ulov te vrste odklene kartico – s konfeti iz ribic.
       if (rezultat.novaKartica) {
+        // Po izrisu okna, da konfeti padajo NAD oknom "Nova kartica!".
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) RibjiKonfeti.pokazi(context);
+        });
         await showDialog<void>(
           context: context,
           builder: (ctx) => AlertDialog(
-            icon: const Icon(Icons.emoji_events, size: 48),
+            // Pokal "poskoči" in se zavrti v pravi položaj.
+            icon: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: 1),
+              duration: const Duration(milliseconds: 900),
+              curve: Curves.elasticOut,
+              builder: (context, v, child) => Transform.rotate(
+                angle: (1 - v) * 0.8,
+                child: Transform.scale(scale: v, child: child),
+              ),
+              child: const Icon(Icons.emoji_events,
+                  size: 72, color: Color(0xFFFFB300)),
+            ),
             title: const Text('Nova kartica!'),
             content: Text(
               '${vrsta.ime[0].toUpperCase()}${vrsta.ime.substring(1)} je '
@@ -185,6 +202,14 @@ class _NovUlovScreenState extends State<NovUlovScreen> {
             ),
             const SizedBox(height: 16),
 
+            // --- Ravnilo: drsnik in riba, ki raste ---
+            _Ravnilo(
+              dolzina: _stevilo(_dolzinaCtrl.text) ?? 0,
+              onSpremeni: (cm) => setState(
+                  () => _dolzinaCtrl.text = cm.toStringAsFixed(0)),
+            ),
+            const SizedBox(height: 8),
+
             // --- Mere ---
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,6 +223,7 @@ class _NovUlovScreenState extends State<NovUlovScreen> {
                       labelText: 'Dolžina *',
                       suffixText: 'cm',
                     ),
+                    onChanged: (_) => setState(() {}),
                     validator: (v) {
                       final x = _stevilo(v ?? '');
                       if (x == null) return 'Vnesite dolžino.';
@@ -315,4 +341,119 @@ class _NovUlovScreenState extends State<NovUlovScreen> {
       ),
     );
   }
+}
+
+/// Ravnilo: riba, ki raste z dolžino, merilo v cm in drsnik.
+class _Ravnilo extends StatelessWidget {
+  final double dolzina;
+  final ValueChanged<double> onSpremeni;
+  const _Ravnilo({required this.dolzina, required this.onSpremeni});
+
+  static const _najvec = 120.0;
+
+  String get _opis {
+    if (dolzina <= 0) return 'Povleci drsnik ali vpiši dolžino';
+    if (dolzina < 20) return 'Ribica za akvarij 🐠';
+    if (dolzina < 35) return 'Lepa riba 👍';
+    if (dolzina < 50) return 'Kar spodobna! 💪';
+    if (dolzina < 60) return 'Kapitalec! 🏆';
+    return 'To pa ni od muh! 🐋';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final barve = Theme.of(context).colorScheme;
+    final vrednost = dolzina.clamp(0.0, _najvec);
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 70,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(end: vrednost),
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOut,
+                builder: (context, v, _) => CustomPaint(
+                  size: const Size(double.infinity, 70),
+                  painter: _RibaNaRavnilu(
+                    delez: v / _najvec,
+                    riba: barve.primary,
+                    crte: barve.outline,
+                  ),
+                ),
+              ),
+            ),
+            Text(
+              dolzina > 0
+                  ? '${dolzina.toStringAsFixed(0)} cm · $_opis'
+                  : _opis,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            Slider(
+              value: vrednost,
+              min: 0,
+              max: _najvec,
+              divisions: _najvec.toInt(),
+              label: '${vrednost.toStringAsFixed(0)} cm',
+              onChanged: (v) => onSpremeni(v < 1 ? 1 : v),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RibaNaRavnilu extends CustomPainter {
+  final double delez; // 0..1 dolžine ravnila
+  final Color riba;
+  final Color crte;
+  _RibaNaRavnilu({required this.delez, required this.riba, required this.crte});
+
+  @override
+  void paint(Canvas c, Size s) {
+    // Merilo: črtica vsakih 10 cm, daljša vsakih 50 cm.
+    final yRavnila = s.height - 8;
+    final p = Paint()
+      ..color = crte
+      ..strokeWidth = 1;
+    c.drawLine(Offset(0, yRavnila), Offset(s.width, yRavnila), p);
+    for (var cm = 0; cm <= 120; cm += 10) {
+      final x = s.width * cm / 120;
+      final dolga = cm % 50 == 0;
+      c.drawLine(Offset(x, yRavnila), Offset(x, yRavnila - (dolga ? 10 : 5)), p);
+    }
+
+    if (delez <= 0) return;
+    // Riba: telo od leve do deleža širine, višina sorazmerna dolžini.
+    final dolzinaRibe = math.max(18.0, s.width * delez);
+    final visina = (dolzinaRibe * 0.32).clamp(10.0, s.height - 20);
+    final sredina = Offset(dolzinaRibe * 0.45, yRavnila - 8 - visina / 2);
+    final telo = Paint()..color = riba;
+    c.drawOval(
+        Rect.fromCenter(
+            center: sredina, width: dolzinaRibe * 0.82, height: visina),
+        telo);
+    // rep na levi
+    final repX = sredina.dx - dolzinaRibe * 0.38;
+    c.drawPath(
+        Path()
+          ..moveTo(repX + 4, sredina.dy)
+          ..lineTo(repX - dolzinaRibe * 0.07, sredina.dy - visina * 0.45)
+          ..lineTo(repX - dolzinaRibe * 0.07, sredina.dy + visina * 0.45)
+          ..close(),
+        telo);
+    // oko na desni
+    c.drawCircle(
+        Offset(sredina.dx + dolzinaRibe * 0.28, sredina.dy - visina * 0.12),
+        math.max(1.5, visina * 0.09),
+        Paint()..color = Colors.white);
+  }
+
+  @override
+  bool shouldRepaint(_RibaNaRavnilu o) => o.delez != delez || o.riba != riba;
 }

@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../models/dovolilnica.dart';
 import '../services/auth_service.dart';
 import '../services/dovolilnica_service.dart';
 import '../utils/format.dart';
+import '../widgets/valovi_glava.dart';
 import 'dovolilnica_qr_screen.dart';
 import 'gostilne_screen.dart';
 import 'lestvica_screen.dart';
@@ -72,10 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
             children: [
-              Text(
-                prvoIme.isEmpty ? 'Pozdravljen!' : 'Pozdravljen, $prvoIme',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
+              ValoviGlava(ime: prvoIme),
               const SizedBox(height: 16),
 
               if (jeCuvaj) ...[

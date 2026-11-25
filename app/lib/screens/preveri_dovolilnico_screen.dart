@@ -9,6 +9,7 @@ import '../models/revir.dart';
 import '../services/dovolilnica_service.dart';
 import '../services/revir_service.dart';
 import '../utils/format.dart';
+import '../widgets/stric_ribic.dart';
 
 /// Izid preverjanja – vsak ima svojo barvo in besedilo.
 enum _Izid { veljavna, seNeVelja, potekla, drugRevir, neObstaja, neznana, niPovezave }
@@ -256,6 +257,24 @@ class _PanelRezultata extends StatelessWidget {
             ? formatDatum(d.veljaOd)
             : '${formatDatum(d.veljaOd)} – ${formatDatum(d.veljaDo)}';
 
+    // Stričkov komentar na rezultat.
+    final (komentar, razpolozenje) = switch (rezultat.izid) {
+      _Izid.veljavna => ('Hmpf. Vse v redu. Lahko ribari.',
+          RazpolozenjeStrica.radoveden),
+      _Izid.potekla => ('Sem vedel! Pot pod noge, kolega! 😤',
+          RazpolozenjeStrica.vesel),
+      _Izid.seNeVelja => ('Prezgodaj, kolega. Pridi, ko bo veljala.',
+          RazpolozenjeStrica.radoveden),
+      _Izid.drugRevir => ('Napačen revir! To je moja voda!',
+          RazpolozenjeStrica.jezen),
+      _Izid.neObstaja => ('Ta dovolilnica ne obstaja. Sumljivo ...',
+          RazpolozenjeStrica.jezen),
+      _Izid.neznana => ('Kaj mi pa to kažeš? Recept za golaž?',
+          RazpolozenjeStrica.radoveden),
+      _Izid.niPovezave => ('Brez signala. Kot leta 1974.',
+          RazpolozenjeStrica.radoveden),
+    };
+
     return Container(
       width: double.infinity,
       color: barva,
@@ -265,6 +284,8 @@ class _PanelRezultata extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            StricKomentar(besedilo: komentar, razpolozenje: razpolozenje),
+            const SizedBox(height: 4),
             Row(
               children: [
                 Icon(ikona, color: Colors.white, size: 40),

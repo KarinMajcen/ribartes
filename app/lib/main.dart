@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'data/testni_podatki.dart';
@@ -106,13 +105,7 @@ class RibartesApp extends StatelessWidget {
       themeMode: ThemeMode.system, // sledi nastavitvi telefona (svetlo/temno)
 
       // Slovenščina za sistemske elemente (koledar, "V redu", "Prekliči" …).
-      locale: const Locale('sl'),
-      supportedLocales: const [Locale('sl'), Locale('en')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+      
 
       // AuthGate odloči: prijavljen → aplikacija, sicer → Prijava.
       home: const AuthGate(),

@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:material_ui/material_ui.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -34,36 +37,128 @@ class DovolilnicaQrScreen extends StatelessWidget {
   }
 }
 
-class _Vsebina extends StatelessWidget {
+/// "Živa" dovolilnica: pri veljavni dovolilnici se rob QR kode vrti v
+/// barvah, oznaka utripa in ura teče v živo. Tako čuvaj na prvi pogled
+/// loči pravo dovolilnico od posnetka zaslona (kot pri vozovnicah).
+class _Vsebina extends StatefulWidget {
   final Dovolilnica d;
   const _Vsebina(this.d);
 
   @override
+  State<_Vsebina> createState() => _VsebinaState();
+}
+
+class _VsebinaState extends State<_Vsebina>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _vrtenje = AnimationController(
+      vsync: this, duration: const Duration(seconds: 3))
+    ..repeat();
+  late final Timer _ura;
+  DateTime _zdaj = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _ura = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() => _zdaj = DateTime.now());
+    });
+  }
+
+  @override
+  void dispose() {
+    _ura.cancel();
+    _vrtenje.dispose();
+    super.dispose();
+  }
+
+  String _dvomestno(int n) => n.toString().padLeft(2, '0');
+
+  @override
   Widget build(BuildContext context) {
+    final d = widget.d;
     final besedilo = Theme.of(context).textTheme;
+    final veljavna = d.stanje == StanjeDovolilnice.veljavna;
+
+    final qr = Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white, // QR koda potrebuje svetlo ozadje za skeniranje
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: QrImageView(
+        data: d.qrVsebina,
+        version: QrVersions.auto,
+        size: 240,
+        semanticsLabel: 'QR koda dovolilnice',
+      ),
+    );
 
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        Center(child: OznakaStanja(d.stanje)),
+        Center(
+          child: veljavna
+              ? ScaleTransition(
+                  // rahlo "dihanje" oznake Veljavna
+                  scale: Tween(begin: 0.95, end: 1.06).animate(CurvedAnimation(
+                    parent: _vrtenje,
+                    curve: const _NazajNaprej(),
+                  )),
+                  child: OznakaStanja(d.stanje),
+                )
+              : OznakaStanja(d.stanje),
+        ),
         const SizedBox(height: 16),
         Center(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white, // QR koda potrebuje svetlo ozadje za skeniranje
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: const [BoxShadow(blurRadius: 8, color: Colors.black12)],
-            ),
-            child: QrImageView(
-              data: d.qrVsebina,
-              version: QrVersions.auto,
-              size: 240,
-              semanticsLabel: 'QR koda dovolilnice',
-            ),
-          ),
+          child: veljavna
+              ? AnimatedBuilder(
+                  animation: _vrtenje,
+                  builder: (context, otrok) => Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(21),
+                      gradient: SweepGradient(
+                        colors: const [
+                          Color(0xFF00C853),
+                          Color(0xFF00B8D4),
+                          Color(0xFF2962FF),
+                          Color(0xFFAA00FF),
+                          Color(0xFF00C853),
+                        ],
+                        transform:
+                            GradientRotation(_vrtenje.value * 2 * math.pi),
+                      ),
+                      boxShadow: const [
+                        BoxShadow(blurRadius: 12, color: Colors.black26)
+                      ],
+                    ),
+                    child: otrok,
+                  ),
+                  child: qr,
+                )
+              : Opacity(opacity: 0.5, child: qr),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 12),
+        if (veljavna)
+          Column(
+            children: [
+              Text(
+                '${_dvomestno(_zdaj.hour)}:${_dvomestno(_zdaj.minute)}:'
+                '${_dvomestno(_zdaj.second)}',
+                textAlign: TextAlign.center,
+                style: besedilo.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              Text(
+                'Živa dovolilnica · posnetek zaslona ne velja',
+                textAlign: TextAlign.center,
+                style: besedilo.bodySmall,
+              ),
+            ],
+          ),
+        const SizedBox(height: 16),
         Text(d.revirIme,
             style: besedilo.headlineSmall, textAlign: TextAlign.center),
         Text('${d.vrsta.naziv} dovolilnica',
@@ -133,4 +228,13 @@ class OznakaStanja extends StatelessWidget {
       side: BorderSide.none,
     );
   }
+}
+
+/// Krivulja, ki gre 0 → 1 → 0 (za utripanje ob ponavljajoči se animaciji).
+class _NazajNaprej extends Curve {
+  const _NazajNaprej();
+
+  @override
+  double transformInternal(double t) =>
+      Curves.easeInOut.transform(t < 0.5 ? t * 2 : (1 - t) * 2);
 }

@@ -98,7 +98,15 @@ class _LestvicaScreenState extends State<LestvicaScreen> {
                     return ListView(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                       children: [
-                        for (var i = 0; i < prikaz.length; i++)
+                        // Prva tri mesta na zmagovalnem odru, ostali pod njim.
+                        _Oder(
+                          // ključ = reka, da se stopničke ob menjavi reke znova dvignejo
+                          key: ValueKey(_reka),
+                          prvi: prikaz.take(3).toList(),
+                          mojUid: _mojUid,
+                        ),
+                        const SizedBox(height: 16),
+                        for (var i = 3; i < prikaz.length; i++)
                           _Vrstica(
                             mesto: i + 1,
                             ulov: prikaz[i],
@@ -118,6 +126,127 @@ class _LestvicaScreenState extends State<LestvicaScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// Zmagovalni oder: 2. mesto levo, 1. na sredini (najvišje), 3. desno.
+/// Stopničke ob prikazu zrastejo iz tal.
+class _Oder extends StatelessWidget {
+  final List<Ulov> prvi;
+  final String? mojUid;
+  const _Oder({super.key, required this.prvi, required this.mojUid});
+
+  @override
+  Widget build(BuildContext context) {
+    // vrstni red na odru: 2., 1., 3.
+    final razpored = <(int, double, Color)>[
+      (2, 90, const Color(0xFFB0BEC5)), // srebro
+      (1, 125, const Color(0xFFFFC107)), // zlato
+      (3, 70, const Color(0xFFD7A26B)), // bron
+    ];
+
+    return SizedBox(
+      height: 270,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          for (final (mesto, visina, barva) in razpored)
+            Expanded(
+              child: mesto <= prvi.length
+                  ? _Stopnicka(
+                      mesto: mesto,
+                      visina: visina,
+                      barva: barva,
+                      ulov: prvi[mesto - 1],
+                      moj: prvi[mesto - 1].uid == mojUid,
+                    )
+                  : const SizedBox.shrink(),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Stopnicka extends StatelessWidget {
+  final int mesto;
+  final double visina;
+  final Color barva;
+  final Ulov ulov;
+  final bool moj;
+
+  const _Stopnicka({
+    required this.mesto,
+    required this.visina,
+    required this.barva,
+    required this.ulov,
+    required this.moj,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const medalje = {1: '🥇', 2: '🥈', 3: '🥉'};
+    final besedilo = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text(medalje[mesto]!, style: TextStyle(fontSize: mesto == 1 ? 40 : 30)),
+          Text(
+            '${ulov.dolzinaCm.toStringAsFixed(0)} cm',
+            style: besedilo.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          Text(ulov.vrstaIme,
+              style: besedilo.bodySmall,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis),
+          Text(
+            moj ? 'Ti' : ulov.javnoIme,
+            style: besedilo.bodySmall?.copyWith(
+              fontWeight: moj ? FontWeight.bold : null,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: visina),
+            duration: Duration(milliseconds: 600 + mesto * 150),
+            curve: Curves.easeOutBack,
+            builder: (context, h, _) => Container(
+              height: h,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [barva, Color.lerp(barva, Colors.black, 0.25)!],
+                ),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(10)),
+                border: moj
+                    ? Border.all(
+                        color: Theme.of(context).colorScheme.primary, width: 3)
+                    : null,
+              ),
+              alignment: Alignment.topCenter,
+              padding: const EdgeInsets.only(top: 8),
+              child: h > 30
+                  ? Text(
+                      '$mesto',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    )
+                  : null,
+            ),
+          ),
+        ],
       ),
     );
   }

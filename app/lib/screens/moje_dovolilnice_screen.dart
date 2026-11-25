@@ -3,11 +3,22 @@ import 'package:material_ui/material_ui.dart';
 import '../models/dovolilnica.dart';
 import '../services/dovolilnica_service.dart';
 import '../utils/format.dart';
+import '../widgets/stric_ribic.dart';
 import 'dovolilnica_qr_screen.dart';
 
 /// Zaslon "Moje dovolilnice" – pokriva US-06.
-class MojeDovolilniceScreen extends StatelessWidget {
-  const MojeDovolilniceScreen({super.key});
+class MojeDovolilniceScreen extends StatefulWidget {
+  /// Ali je zavihek trenutno viden (takrat pride stric).
+  final bool aktiven;
+  const MojeDovolilniceScreen({super.key, this.aktiven = true});
+
+  @override
+  State<MojeDovolilniceScreen> createState() => _MojeDovolilniceScreenState();
+}
+
+class _MojeDovolilniceScreenState extends State<MojeDovolilniceScreen> {
+  late final Stream<List<Dovolilnica>> _tok =
+      DovolilnicaService().mojeDovolilnice();
 
   @override
   Widget build(BuildContext context) {
@@ -16,56 +27,77 @@ class MojeDovolilniceScreen extends StatelessWidget {
       body: StreamBuilder<List<Dovolilnica>>(
         // Firestore hrani zadnje naložene podatke na napravi, zato se seznam
         // in QR kode prikažejo tudi brez povezave (US-06, scenarij brez povezave).
-        stream: DovolilnicaService().mojeDovolilnice(),
+        stream: _tok,
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(
-                child: Text('Dovolilnic ni bilo mogoče naložiti.'));
-          }
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          final vse = snapshot.data!;
-          if (vse.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Text(
-                  'Še nimate dovolilnic.\nKupite jo pri izbranem revirju.',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            );
-          }
-
-          // Aktivne (veljavne in prihodnje) zgoraj, najprej tiste, ki začnejo prej.
-          final aktivne = vse
-              .where((d) => d.stanje != StanjeDovolilnice.potekla)
-              .toList()
-            ..sort((a, b) => a.veljaOd.compareTo(b.veljaOd));
-          // Zgodovina: najnovejša potekla na vrhu.
-          final zgodovina = vse
-              .where((d) => d.stanje == StanjeDovolilnice.potekla)
-              .toList()
-            ..sort((a, b) => b.veljaDo.compareTo(a.veljaDo));
-
-          return ListView(
-            padding: const EdgeInsets.all(16),
+          final imaVeljavno = (snapshot.data ?? [])
+              .any((d) => d.stanje == StanjeDovolilnice.veljavna);
+          return Stack(
             children: [
-              if (aktivne.isNotEmpty) ...[
-                const _Naslov('Aktivne'),
-                for (final d in aktivne) _DovolilnicaKartica(d),
-              ],
-              if (zgodovina.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                const _Naslov('Zgodovina'),
-                for (final d in zgodovina) _DovolilnicaKartica(d),
-              ],
+              Positioned.fill(child: _seznam(context, snapshot)),
+              // Stric ribič – hecen element; pride, ko je zavihek viden.
+              if (snapshot.hasData)
+                Positioned(
+                  right: 12,
+                  bottom: 8,
+                  child: StricRibic(
+                    imaVeljavno: imaVeljavno,
+                    aktiven: widget.aktiven,
+                  ),
+                ),
             ],
           );
         },
       ),
+    );
+  }
+
+  Widget _seznam(
+      BuildContext context, AsyncSnapshot<List<Dovolilnica>> snapshot) {
+    if (snapshot.hasError) {
+      return const Center(
+          child: Text('Dovolilnic ni bilo mogoče naložiti.'));
+    }
+    if (!snapshot.hasData) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final vse = snapshot.data!;
+    if (vse.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            'Še nimate dovolilnic.\nKupite jo pri izbranem revirju.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    // Aktivne (veljavne in prihodnje) zgoraj, najprej tiste, ki začnejo prej.
+    final aktivne = vse
+        .where((d) => d.stanje != StanjeDovolilnice.potekla)
+        .toList()
+      ..sort((a, b) => a.veljaOd.compareTo(b.veljaOd));
+    // Zgodovina: najnovejša potekla na vrhu.
+    final zgodovina = vse
+        .where((d) => d.stanje == StanjeDovolilnice.potekla)
+        .toList()
+      ..sort((a, b) => b.veljaDo.compareTo(a.veljaDo));
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 260),
+      children: [
+        if (aktivne.isNotEmpty) ...[
+          const _Naslov('Aktivne'),
+          for (final d in aktivne) _DovolilnicaKartica(d),
+        ],
+        if (zgodovina.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          const _Naslov('Zgodovina'),
+          for (final d in zgodovina) _DovolilnicaKartica(d),
+        ],
+      ],
     );
   }
 }

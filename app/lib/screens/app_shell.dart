@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'home_screen.dart';
 import 'moje_dovolilnice_screen.dart';
@@ -29,7 +29,7 @@ class _AppShellState extends State<AppShell> {
         children: [
           HomeScreen(onPojdiNa: _pojdiNa),
           const RevirjiScreen(),
-          const MojeDovolilniceScreen(),
+          MojeDovolilniceScreen(aktiven: _zavihek == Zavihek.dovolilnice),
           const RibjiAlbumScreen(),
           const ProfilScreen(),
         ],
