@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../data/koordinate.dart';
+
 /// Model revirja – en dokument v zbirki "revirji".
 class Revir {
   final String id;
@@ -13,6 +15,10 @@ class Revir {
   final double cenaTedenska;
   final double cenaLetna;
 
+  /// Lokacija revirja (za zemljevid in vreme). Null, če ni znana.
+  final double? lat;
+  final double? lng;
+
   const Revir({
     required this.id,
     required this.ime,
@@ -24,6 +30,8 @@ class Revir {
     required this.cenaDnevna,
     required this.cenaTedenska,
     required this.cenaLetna,
+    this.lat,
+    this.lng,
   });
 
   /// Pretvori dokument iz Firestore v objekt Revir.
@@ -41,6 +49,9 @@ class Revir {
       cenaDnevna: (cene['dnevna'] as num?)?.toDouble() ?? 0,
       cenaTedenska: (cene['tedenska'] as num?)?.toDouble() ?? 0,
       cenaLetna: (cene['letna'] as num?)?.toDouble() ?? 0,
+      // Koordinate iz baze; če jih ni, iz testnih podatkov v kodi.
+      lat: (d['lat'] as num?)?.toDouble() ?? koordinateRevirjev[doc.id]?.$1,
+      lng: (d['lng'] as num?)?.toDouble() ?? koordinateRevirjev[doc.id]?.$2,
     );
   }
 

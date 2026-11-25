@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../models/revir.dart';
 import '../utils/format.dart';
 import '../widgets/reka_glava.dart';
+import '../widgets/vreme_kartica.dart';
 import 'nakup_screen.dart';
 
 /// Zaslon "Podrobnosti revirja" – pokriva US-04.
@@ -55,6 +56,13 @@ class RevirDetailScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(revir.opis),
                 const SizedBox(height: 24),
+
+                if (revir.lat != null && revir.lng != null) ...[
+                  Text('Vreme ob revirju', style: besedilo.titleLarge),
+                  const SizedBox(height: 8),
+                  VremeKartica(lat: revir.lat!, lng: revir.lng!),
+                  const SizedBox(height: 24),
+                ],
 
                 Text('Vrste rib', style: besedilo.titleLarge),
                 const SizedBox(height: 8),

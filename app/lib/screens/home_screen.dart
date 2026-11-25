@@ -103,8 +103,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     return _NiDovolilnice(
                         onKupi: () => _zavihek(Zavihek.revirji));
                   }
+                  // Opozorilo, če katera veljavna dovolilnica poteče v < 24 h.
+                  final kmalu = veljavne
+                      .where((d) =>
+                          d.veljaDo.difference(DateTime.now()).inHours < 24)
+                      .toList();
                   return Column(
                     children: [
+                      for (final d in kmalu) _PotekaKmalu(d),
                       for (final d in veljavne)
                         _VeljavnaDovolilnica(
                           d,
@@ -188,6 +194,35 @@ class _VeljavnaDovolilnica extends StatelessWidget {
         isThreeLine: true,
         trailing: const Icon(Icons.chevron_right, color: Colors.white),
         onTap: onTap,
+      ),
+    );
+  }
+}
+
+/// Rumeno opozorilo: dovolilnica poteče čez X ur / minut.
+class _PotekaKmalu extends StatelessWidget {
+  final Dovolilnica d;
+  const _PotekaKmalu(this.d);
+
+  @override
+  Widget build(BuildContext context) {
+    final ostane = d.veljaDo.difference(DateTime.now());
+    final cez = ostane.inHours >= 1
+        ? 'čez ${ostane.inHours} h'
+        : 'čez ${ostane.inMinutes.clamp(1, 59)} min';
+    return Card(
+      color: const Color(0xFFFFF3CD),
+      child: ListTile(
+        leading: const Icon(Icons.timer, color: Color(0xFF8A6D00)),
+        title: Text(
+          'Dovolilnica za ${d.revirIme} poteče $cez',
+          style: const TextStyle(
+              color: Color(0xFF5C4800), fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(
+          'Velja do ${formatDatum(d.veljaDo)}, 23:59',
+          style: const TextStyle(color: Color(0xFF5C4800)),
+        ),
       ),
     );
   }

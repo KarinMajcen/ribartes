@@ -5,6 +5,7 @@ import '../services/revir_service.dart';
 import '../utils/format.dart';
 import '../widgets/reka_glava.dart';
 import 'revir_detail_screen.dart';
+import 'zemljevid_screen.dart';
 
 /// Zaslon "Revirji" – pokriva US-03.
 class RevirjiScreen extends StatefulWidget {
@@ -22,7 +23,18 @@ class _RevirjiScreenState extends State<RevirjiScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Revirji')),
+      appBar: AppBar(
+        title: const Text('Revirji'),
+        actions: [
+          IconButton(
+            tooltip: 'Zemljevid',
+            icon: const Icon(Icons.map),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ZemljevidScreen()),
+            ),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
