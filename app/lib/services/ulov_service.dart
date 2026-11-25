@@ -66,6 +66,32 @@ class UlovService {
         .map((s) => s.docs.map(Ulov.izFirestore).toList());
   }
 
+  /// Izbriše ulov. Če je bila riba vrnjena v reko, se odštejejo tudi točke,
+  /// ki jih je ribič zanjo prejel (sicer bi lahko točke "nabiral" z brisanjem).
+  Future<void> izbrisi(Ulov ulov) async {
+    final batch = _db.batch();
+    batch.delete(_ulovi.doc(ulov.id));
+    if (ulov.spuscena) {
+      batch.set(
+        _db.collection('uporabniki').doc(ulov.uid),
+        {'tocke': FieldValue.increment(-Tocke.zaSpuscenoRibo)},
+        SetOptions(merge: true),
+      );
+    }
+    // Brez povezave se izbris izvede lokalno in pošlje kasneje.
+    try {
+      await batch.commit().timeout(const Duration(seconds: 5));
+    } on TimeoutException {
+      // ostane v čakalni vrsti Firestore
+    }
+    // Fotografijo pobrišemo z naprave.
+    final pot = ulov.fotoPot;
+    if (pot != null) {
+      final datoteka = File(pot);
+      if (await datoteka.exists()) await datoteka.delete();
+    }
+  }
+
   /// Fotografijo kopira v zasebno mapo aplikacije in vrne pot do nje.
   Future<String> shraniFotografijo(XFile foto) async {
     final mapa = await getApplicationDocumentsDirectory();

@@ -1,13 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
-import 'home_screen.dart';
+import 'app_shell.dart';
 import 'login_screen.dart';
 
 /// "Vratar": posluša stanje prijave in prikaže pravi zaslon.
 /// Ker Firebase prijavo zapomni, je ribič ob ponovnem zagonu takoj
-/// na Domačem zaslonu (US-02, scenarij "ostane prijavljen").
+/// v aplikaciji (US-02, scenarij "ostane prijavljen").
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
@@ -22,7 +22,7 @@ class AuthGate extends StatelessWidget {
           );
         }
         if (snapshot.hasData) {
-          return const HomeScreen();
+          return const AppShell();
         }
         return const LoginScreen();
       },

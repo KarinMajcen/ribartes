@@ -1,4 +1,4 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
 import 'register_screen.dart';
@@ -50,6 +50,30 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _pozabljenoGeslo() async {
+    final email = _emailCtrl.text.trim();
+    if (!email.contains('@')) {
+      setState(() => _napaka =
+          'Vpišite e-pošto zgoraj, nato tapnite »Pozabljeno geslo?«.');
+      return;
+    }
+    setState(() {
+      _nalaganje = true;
+      _napaka = null;
+    });
+    try {
+      await _auth.ponastaviGeslo(email);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Povezavo za novo geslo smo poslali na $email.'),
+      ));
+    } on AuthNapaka catch (e) {
+      setState(() => _napaka = e.sporocilo);
+    } finally {
+      if (mounted) setState(() => _nalaganje = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final barve = Theme.of(context).colorScheme;
@@ -64,12 +88,23 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(Icons.phishing, size: 72, color: barve.primary),
+                  Center(
+                    child: CircleAvatar(
+                      radius: 48,
+                      backgroundColor: barve.primary,
+                      child: Icon(Icons.phishing,
+                          size: 56, color: barve.onPrimary),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   const SizedBox(height: 8),
                   Text(
                     'RIBARTes',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   Text(
                     'Lovim, torej sem',
@@ -109,6 +144,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     validator: (v) =>
                         (v == null || v.isEmpty) ? 'Vnesite geslo.' : null,
                     onFieldSubmitted: (_) => _prijava(),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _nalaganje ? null : _pozabljenoGeslo,
+                      child: const Text('Pozabljeno geslo?'),
+                    ),
                   ),
                   if (_napaka != null) ...[
                     const SizedBox(height: 16),

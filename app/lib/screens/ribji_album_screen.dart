@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 import '../models/ulov.dart';
 import '../models/vrsta_ribe.dart';
@@ -116,6 +116,7 @@ class _Album extends StatelessWidget {
                 vrsta: v,
                 stevilo: steviloPoVrsti[v.id] ?? 0,
                 najdaljsi: najdaljsiPoVrsti[v.id],
+                ulovi: ulovi.where((u) => u.vrstaId == v.id).toList(),
               ),
           ],
         ),
@@ -128,14 +129,38 @@ class _Kartica extends StatelessWidget {
   final VrstaRibe vrsta;
   final int stevilo;
   final double? najdaljsi;
-  const _Kartica({required this.vrsta, required this.stevilo, this.najdaljsi});
+  final List<Ulov> ulovi;
+  const _Kartica({
+    required this.vrsta,
+    required this.stevilo,
+    this.najdaljsi,
+    required this.ulovi,
+  });
+
+  void _podrobnosti(BuildContext context) {
+    if (stevilo == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Ujemi ${vrsta.ime}, da odkleneš kartico.'),
+      ));
+      return;
+    }
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (_) => _PodrobnostiVrste(vrsta: vrsta, ulovi: ulovi),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final barve = Theme.of(context).colorScheme;
     final odklenjena = stevilo > 0;
 
-    return Semantics(
+    return GestureDetector(
+      onTap: () => _podrobnosti(context),
+      child: Semantics(
+      button: true,
       label: odklenjena
           ? '${vrsta.ime}, ujetih $stevilo'
           : '${vrsta.ime}, zaklenjena kartica',
@@ -174,6 +199,90 @@ class _Kartica extends StatelessWidget {
           ),
         ),
       ),
+      ),
+    );
+  }
+}
+
+/// Spodnji list s podrobnostmi odklenjene vrste.
+class _PodrobnostiVrste extends StatelessWidget {
+  final VrstaRibe vrsta;
+  final List<Ulov> ulovi;
+  const _PodrobnostiVrste({required this.vrsta, required this.ulovi});
+
+  @override
+  Widget build(BuildContext context) {
+    final besedilo = Theme.of(context).textTheme;
+    final barve = Theme.of(context).colorScheme;
+    final razvrsceni = [...ulovi]
+      ..sort((a, b) => b.dolzinaCm.compareTo(a.dolzinaCm));
+    final spuscenih = ulovi.where((u) => u.spuscena).length;
+    final prvi = ulovi.map((u) => u.datum).reduce((a, b) => a.isBefore(b) ? a : b);
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: barve.primaryContainer,
+                  child: Icon(Icons.phishing, color: barve.primary, size: 32),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${vrsta.ime[0].toUpperCase()}${vrsta.ime.substring(1)}',
+                        style: besedilo.headlineSmall,
+                      ),
+                      Text(vrsta.latinsko,
+                          style: besedilo.bodyMedium
+                              ?.copyWith(fontStyle: FontStyle.italic)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text('Kartica odklenjena ${formatDatum(prvi)} · '
+                'ulovov: ${ulovi.length} · vrnjenih v reko: $spuscenih'),
+            const SizedBox(height: 16),
+            Text('Moji ulovi te vrste', style: besedilo.titleMedium),
+            const SizedBox(height: 8),
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.35),
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  for (var i = 0; i < razvrsceni.length; i++)
+                    ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      leading: Text(i == 0 ? '🏆' : '${i + 1}.',
+                          style: const TextStyle(fontSize: 18)),
+                      title: Text(
+                          '${razvrsceni[i].dolzinaCm.toStringAsFixed(0)} cm'
+                          '${razvrsceni[i].tezaKg == null ? '' : ' · ${razvrsceni[i].tezaKg!.toStringAsFixed(1)} kg'}'),
+                      subtitle: Text('${formatDatum(razvrsceni[i].datum)}'
+                          '${razvrsceni[i].revirIme == null ? '' : ' · ${razvrsceni[i].revirIme}'}'),
+                      trailing: razvrsceni[i].spuscena
+                          ? const Icon(Icons.eco, color: Colors.green)
+                          : null,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -199,8 +308,60 @@ class _SeznamUlovov extends StatelessWidget {
     }
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-      itemCount: ulovi.length,
-      itemBuilder: (context, i) => _UlovKartica(ulovi[i]),
+      itemCount: ulovi.length + 1,
+      itemBuilder: (context, i) {
+        if (i == 0) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text('Za brisanje ulov povleci v levo.',
+                style: Theme.of(context).textTheme.bodySmall),
+          );
+        }
+        final u = ulovi[i - 1];
+        return Dismissible(
+          key: ValueKey(u.id),
+          direction: DismissDirection.endToStart,
+          background: Container(
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.only(right: 24),
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.error,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(Icons.delete,
+                color: Theme.of(context).colorScheme.onError),
+          ),
+          confirmDismiss: (_) => showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Izbriši ulov?'),
+              content: Text(
+                '${u.vrstaIme}, ${u.dolzinaCm.toStringAsFixed(0)} cm, '
+                '${formatDatum(u.datum)}'
+                '${u.spuscena ? '\nOdšteli bomo tudi ${Tocke.zaSpuscenoRibo} točk.' : ''}',
+              ),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('Prekliči')),
+                FilledButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text('Izbriši')),
+              ],
+            ),
+          ),
+          onDismissed: (_) async {
+            await UlovService().izbrisi(u);
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Ulov je izbrisan.')),
+              );
+            }
+          },
+          child: _UlovKartica(u),
+        );
+      },
     );
   }
 }

@@ -62,6 +62,15 @@ class AuthService {
   /// US-02: odjava.
   Future<void> odjava() => _auth.signOut();
 
+  /// Pozabljeno geslo: Firebase pošlje e-pošto s povezavo za novo geslo.
+  Future<void> ponastaviGeslo(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email.trim());
+    } on FirebaseAuthException catch (e) {
+      throw AuthNapaka(_prevediNapako(e.code));
+    }
+  }
+
   /// Kode napak Firebase prevede v sporočila iz scenarijev v specifikaciji.
   String _prevediNapako(String koda) {
     switch (koda) {

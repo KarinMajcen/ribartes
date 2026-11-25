@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 import '../models/dovolilnica.dart';
 import '../services/auth_service.dart';
@@ -8,16 +8,17 @@ import '../utils/format.dart';
 import 'dovolilnica_qr_screen.dart';
 import 'gostilne_screen.dart';
 import 'lestvica_screen.dart';
-import 'moje_dovolilnice_screen.dart';
+import 'app_shell.dart';
 import 'nov_ulov_screen.dart';
 import 'preveri_dovolilnico_screen.dart';
-import 'revirji_screen.dart';
-import 'ribji_album_screen.dart';
 
 /// Domači zaslon: veljavna dovolilnica na vrhu, točke in hitri dostop
 /// do glavnih funkcij (zaslon 2 iz prijave ideje).
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  /// Preklop na drug zavihek spodnje vrstice (npr. Revirji).
+  final void Function(int zavihek)? onPojdiNa;
+
+  const HomeScreen({super.key, this.onPojdiNa});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -38,6 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void _odpri(Widget zaslon) => Navigator.of(context)
       .push(MaterialPageRoute(builder: (_) => zaslon));
 
+  void _zavihek(int z) => widget.onPojdiNa?.call(z);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,9 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('RIBARTes'),
         actions: [
           IconButton(
-            tooltip: 'Odjava',
-            icon: const Icon(Icons.logout),
-            onPressed: () => _auth.odjava(),
+            tooltip: 'Profil',
+            icon: const Icon(Icons.account_circle),
+            onPressed: () => _zavihek(Zavihek.profil),
           ),
         ],
       ),
@@ -100,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (!snap.hasData) return const SizedBox(height: 8);
                   if (veljavne.isEmpty) {
                     return _NiDovolilnice(
-                        onKupi: () => _odpri(const RevirjiScreen()));
+                        onKupi: () => _zavihek(Zavihek.revirji));
                   }
                   return Column(
                     children: [
@@ -130,16 +133,27 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 16),
 
-              _Gumb(Icons.water, 'Revirji in nakup dovolilnice',
-                  () => _odpri(const RevirjiScreen())),
-              _Gumb(Icons.qr_code, 'Moje dovolilnice',
-                  () => _odpri(const MojeDovolilniceScreen())),
-              _Gumb(Icons.photo_album, 'Ribji album in ulovi',
-                  () => _odpri(const RibjiAlbumScreen())),
-              _Gumb(Icons.leaderboard, 'Tedenska lestvica',
-                  () => _odpri(const LestvicaScreen())),
-              _Gumb(Icons.restaurant, 'Ti ujameš, mi spečemo',
-                  () => _odpri(const GostilneScreen())),
+              Text('Hitri dostop',
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                childAspectRatio: 1.6,
+                children: [
+                  _Ploscica(Icons.water, 'Revirji', 'Nakup dovolilnice',
+                      () => _zavihek(Zavihek.revirji)),
+                  _Ploscica(Icons.photo_album, 'Ribji album', 'Moji ulovi',
+                      () => _zavihek(Zavihek.album)),
+                  _Ploscica(Icons.leaderboard, 'Lestvica', 'Največji ulovi',
+                      () => _odpri(const LestvicaScreen())),
+                  _Ploscica(Icons.restaurant, 'Ti ujameš,', 'mi spečemo',
+                      () => _odpri(const GostilneScreen())),
+                ],
+              ),
             ],
           );
         },
@@ -198,20 +212,39 @@ class _NiDovolilnice extends StatelessWidget {
   }
 }
 
-class _Gumb extends StatelessWidget {
+class _Ploscica extends StatelessWidget {
   final IconData ikona;
-  final String besedilo;
+  final String naslov;
+  final String podnaslov;
   final VoidCallback onTap;
-  const _Gumb(this.ikona, this.besedilo, this.onTap);
+  const _Ploscica(this.ikona, this.naslov, this.podnaslov, this.onTap);
 
   @override
   Widget build(BuildContext context) {
+    final barve = Theme.of(context).colorScheme;
+    final besedilo = Theme.of(context).textTheme;
     return Card(
-      child: ListTile(
-        leading: Icon(ikona),
-        title: Text(besedilo),
-        trailing: const Icon(Icons.chevron_right),
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
         onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(ikona, color: barve.primary, size: 28),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(naslov, style: besedilo.titleMedium),
+                  Text(podnaslov, style: besedilo.bodySmall),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
