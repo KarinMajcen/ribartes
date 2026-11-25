@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../models/revir.dart';
 import '../services/revir_service.dart';
@@ -60,7 +60,7 @@ class _RevirjiScreenState extends State<RevirjiScreen> {
                 return ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: revirji.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, i) => _RevirKartica(revirji[i]),
                 );
               },
