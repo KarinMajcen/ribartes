@@ -26,12 +26,16 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Revirji in vrste rib: samo branje. Urejanje je izven obsega (Won't).
+    // Revirji, vrste rib, gostilne: samo branje (urejanje je izven obsega – Won't).
     match /revirji/{id} {
       allow read: if prijavljen();
       allow write: if false;
     }
     match /vrste_rib/{id} {
+      allow read: if prijavljen();
+      allow write: if false;
+    }
+    match /gostilne/{id} {
       allow read: if prijavljen();
       allow write: if false;
     }
@@ -44,11 +48,24 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // Ulovi: ribič ustvari, bere, ureja in briše samo svoje.
+    // Ulovi: berejo jih vsi prijavljeni (tedenska lestvica, US-12);
+    // ustvari, ureja in briše jih samo lastnik.
     match /ulovi/{id} {
-      allow read: if jeLastnik(resource.data.uid);
+      allow read: if prijavljen();
       allow create: if jeLastnik(request.resource.data.uid);
       allow update, delete: if jeLastnik(resource.data.uid);
+    }
+
+    // Rezervacije: ribič ustvari in bere svoje. Edina dovoljena sprememba
+    // je preklic (stanje → "preklicana"); brisanje ni dovoljeno.
+    match /rezervacije/{id} {
+      allow read: if jeLastnik(resource.data.uid);
+      allow create: if jeLastnik(request.resource.data.uid)
+                    && request.resource.data.stanje == 'potrjena';
+      allow update: if jeLastnik(resource.data.uid)
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stanje'])
+                    && request.resource.data.stanje == 'preklicana';
+      allow delete: if false;
     }
   }
 }
