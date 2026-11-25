@@ -25,6 +25,8 @@ class VremeService {
       'latitude': '$lat',
       'longitude': '$lng',
       'current': 'temperature_2m,weather_code,wind_speed_10m',
+      'daily': 'sunrise,sunset',
+      'forecast_days': '1',
       'timezone': 'Europe/Ljubljana',
     });
 

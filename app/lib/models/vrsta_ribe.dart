@@ -8,6 +8,16 @@ class VrstaRibe {
 
   const VrstaRibe({required this.id, required this.ime, required this.latinsko});
 
+  /// Redke (zaščitene ali težko ulovljive) vrste – v albumu zlate kartice.
+  static const redkeVrste = {
+    'soska-postrv',
+    'sulec',
+    'jezerska-zlatovcica',
+    'som',
+  };
+
+  bool get redka => redkeVrste.contains(id);
+
   factory VrstaRibe.izFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final d = doc.data() ?? {};
     return VrstaRibe(

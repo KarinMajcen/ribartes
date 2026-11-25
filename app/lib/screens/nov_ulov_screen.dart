@@ -92,6 +92,7 @@ class _NovUlovScreenState extends State<NovUlovScreen> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) RibjiKonfeti.pokazi(context);
         });
+        HapticFeedback.heavyImpact(); // telefon zavibrira
         await showDialog<void>(
           context: context,
           builder: (ctx) => AlertDialog(
@@ -107,7 +108,7 @@ class _NovUlovScreenState extends State<NovUlovScreen> {
               child: const Icon(Icons.emoji_events,
                   size: 72, color: Color(0xFFFFB300)),
             ),
-            title: const Text('Nova kartica!'),
+            title: Text(vrsta.redka ? '✨ Redka kartica! ✨' : 'Nova kartica!'),
             content: Text(
               '${vrsta.ime[0].toUpperCase()}${vrsta.ime.substring(1)} je '
               'zdaj v tvojem ribjem albumu.',

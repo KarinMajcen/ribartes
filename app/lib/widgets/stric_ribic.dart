@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Stric ribič – animiran lik, ki ribiča na zavihku Dovolilnice "nadere".
@@ -85,6 +86,12 @@ class _StricRibicState extends State<StricRibic> with TickerProviderStateMixin {
   String _prikazano = '';
   double _oci = 1; // 1 = odprte, 0 = zaprte
   bool _skrit = false;
+
+  // Skrivnost: 7 hitrih tapov zapored → stric zaspi.
+  int _tapi = 0;
+  DateTime? _zadnjiTap;
+  bool _spi = false;
+  Timer? _zbujanje;
   bool _govori_ = false; // ali se besedilo še izpisuje
 
   /// Gumb za nakup pokažemo, ko je stric izrekel celoten scenarij.
@@ -138,7 +145,7 @@ class _StricRibicState extends State<StricRibic> with TickerProviderStateMixin {
       _prikazano = '';
       _govori_ = true;
     });
-    _usta.repeat(reverse: true);
+    if (!_spi) _usta.repeat(reverse: true); // med spanjem ne govori z usti
     var i = 0;
     _tipkanje = Timer.periodic(const Duration(milliseconds: 38), (t) {
       if (!mounted) return t.cancel();
@@ -160,7 +167,35 @@ class _StricRibicState extends State<StricRibic> with TickerProviderStateMixin {
     });
   }
 
+  void _zaspi() {
+    _samodejno?.cancel();
+    _zbujanje?.cancel();
+    setState(() => _spi = true);
+    _govori(const _Stavek('Zzz ... zzz ... 💤', RazpolozenjeStrica.radoveden));
+    _zbujanje = Timer(const Duration(milliseconds: 3500), () {
+      if (!mounted) return;
+      setState(() => _spi = false);
+      HapticFeedback.mediumImpact();
+      _govori(const _Stavek(
+          'A?! Kaj je? Ribe spijo, pa jaz tudi!', RazpolozenjeStrica.jezen));
+    });
+  }
+
   void _tap() {
+    HapticFeedback.selectionClick(); // rahla vibracija ob tapu
+    if (_spi) return; // spečega ne zbudiš s tapom :)
+
+    final zdaj = DateTime.now();
+    final hitro = _zadnjiTap != null &&
+        zdaj.difference(_zadnjiTap!) < const Duration(milliseconds: 900);
+    _tapi = hitro ? _tapi + 1 : 1;
+    _zadnjiTap = zdaj;
+    if (_tapi >= 7) {
+      _tapi = 0;
+      _zaspi();
+      return;
+    }
+
     if (_korak < _scenarij.length - 1) {
       _korak++;
       _govori(_scenarij[_korak]);
@@ -194,6 +229,7 @@ class _StricRibicState extends State<StricRibic> with TickerProviderStateMixin {
     _tipkanje?.cancel();
     _mezik?.cancel();
     _samodejno?.cancel();
+    _zbujanje?.cancel();
     _vstop.dispose();
     _zibanje.dispose();
     _usta.dispose();
@@ -317,7 +353,7 @@ class _StricRibicState extends State<StricRibic> with TickerProviderStateMixin {
                         size: const Size(120, 150),
                         painter: StricSlikar(
                           usta: _usta.value,
-                          oci: _oci,
+                          oci: _spi ? 0 : _oci, // spi = zaprte oči
                           razpolozenje: razpolozenje,
                         ),
                       ),

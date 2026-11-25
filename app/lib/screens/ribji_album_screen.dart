@@ -165,10 +165,28 @@ class _Kartica extends StatelessWidget {
           ? '${vrsta.ime}, ujetih $stevilo'
           : '${vrsta.ime}, zaklenjena kartica',
       child: Card(
+        clipBehavior: Clip.antiAlias,
         color: odklenjena
-            ? barve.primaryContainer
+            ? (vrsta.redka ? const Color(0xFFFFF4D6) : barve.primaryContainer)
             : barve.surfaceContainerHighest,
-        child: Padding(
+        // Redka kartica: zlat rob
+        shape: vrsta.redka
+            ? RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: odklenjena
+                      ? const Color(0xFFFFB300)
+                      : const Color(0xFFFFB300).withValues(alpha: 0.4),
+                  width: 2.5,
+                ),
+              )
+            : null,
+        child: Stack(
+          children: [
+            if (odklenjena && vrsta.redka)
+              const Positioned.fill(child: IgnorePointer(child: _Lesk())),
+            Positioned.fill(
+              child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -176,7 +194,9 @@ class _Kartica extends StatelessWidget {
               Icon(
                 odklenjena ? Icons.phishing : Icons.lock,
                 size: 40,
-                color: odklenjena ? barve.primary : barve.outline,
+                color: odklenjena
+                    ? (vrsta.redka ? const Color(0xFFB8860B) : barve.primary)
+                    : barve.outline,
               ),
               const SizedBox(height: 8),
               Text(
@@ -185,18 +205,35 @@ class _Kartica extends StatelessWidget {
                 maxLines: 2,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: odklenjena ? null : barve.outline,
+                  color: odklenjena
+                      ? (vrsta.redka ? Colors.brown.shade900 : null)
+                      : barve.outline,
                 ),
               ),
               if (odklenjena) ...[
                 const SizedBox(height: 4),
                 Text(
                   '×$stevilo · ${najdaljsi!.toStringAsFixed(0)} cm',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: vrsta.redka ? Colors.brown.shade700 : null),
                 ),
               ],
+              if (vrsta.redka)
+                Text(
+                  '✨ redka',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: odklenjena
+                        ? const Color(0xFFB8860B)
+                        : barve.outline,
+                  ),
+                ),
             ],
           ),
+        ),
+            ),
+          ],
         ),
       ),
       ),
@@ -399,6 +436,51 @@ class _UlovKartica extends StatelessWidget {
               )
             : null,
       ),
+    );
+  }
+}
+
+/// Svetleč odblesk, ki počasi drsi čez redko kartico (kot hologram).
+class _Lesk extends StatefulWidget {
+  const _Lesk();
+
+  @override
+  State<_Lesk> createState() => _LeskState();
+}
+
+class _LeskState extends State<_Lesk> with SingleTickerProviderStateMixin {
+  late final AnimationController _cas = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 2600))
+    ..repeat();
+
+  @override
+  void dispose() {
+    _cas.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _cas,
+      builder: (context, _) {
+        // Pas svetlobe potuje od -1 do 2 (izven kartice na obeh straneh).
+        final p = -1 + 3 * _cas.value;
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment(-1 + p, -1),
+              end: Alignment(p, 1),
+              colors: [
+                Colors.white.withValues(alpha: 0),
+                Colors.white.withValues(alpha: 0.65),
+                Colors.white.withValues(alpha: 0),
+              ],
+              stops: const [0.35, 0.5, 0.65],
+            ),
+          ),
+        );
+      },
     );
   }
 }

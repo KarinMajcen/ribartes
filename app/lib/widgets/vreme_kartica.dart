@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../models/vreme.dart';
 import '../services/vreme_service.dart';
+import '../utils/format.dart';
 
 /// Kartica s trenutnim vremenom ob revirju in ribolovno napovedjo.
 class VremeKartica extends StatefulWidget {
@@ -116,6 +117,25 @@ class _VremeKarticaState extends State<VremeKartica> {
                   const SizedBox(width: 8),
                   Expanded(child: Text(v.opisIndeksa)),
                 ]),
+                if (v.vzhod != null && v.zahod != null) ...[
+                  const Divider(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _Sonce('🌅', 'Vzhod', formatUra(v.vzhod!)),
+                      _Sonce('🌇', 'Zahod', formatUra(v.zahod!)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '✨ Zlata ura: ${formatUra(v.jutranjaZlataUra!.$1)}–'
+                    '${formatUra(v.jutranjaZlataUra!.$2)} in '
+                    '${formatUra(v.vecernaZlataUra!.$1)}–'
+                    '${formatUra(v.vecernaZlataUra!.$2)}',
+                    style: besedilo.bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ],
                 const SizedBox(height: 8),
                 Text('Vir: Open-Meteo.com', style: besedilo.bodySmall),
               ],
@@ -123,6 +143,24 @@ class _VremeKarticaState extends State<VremeKartica> {
           ),
         );
       },
+    );
+  }
+}
+
+class _Sonce extends StatelessWidget {
+  final String ikona;
+  final String oznaka;
+  final String ura;
+  const _Sonce(this.ikona, this.oznaka, this.ura);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(ikona, style: const TextStyle(fontSize: 26)),
+        Text(ura, style: Theme.of(context).textTheme.titleMedium),
+        Text(oznaka, style: Theme.of(context).textTheme.bodySmall),
+      ],
     );
   }
 }
