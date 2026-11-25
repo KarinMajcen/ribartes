@@ -12,6 +12,7 @@ import '../widgets/reka_glava.dart';
 import '../widgets/vreme_kartica.dart';
 import 'revir_detail_screen.dart';
 import 'rezervacija_screen.dart';
+import '../tema/tema.dart';
 
 /// Zemljevid revirjev in partnerskih gostiln (OpenStreetMap).
 class ZemljevidScreen extends StatefulWidget {
@@ -83,7 +84,7 @@ class _ZemljevidScreenState extends State<ZemljevidScreen> {
                               width: 40,
                               height: 40,
                               child: _Oznaka(
-                                barva: const Color(0xFFE65100),
+                                barva: Paleta.tolmun,
                                 ikona: Icons.restaurant,
                                 izbrana: _izbranaGostilna?.id == g.id,
                                 onTap: () => _izberiGostilno(g),
@@ -142,7 +143,7 @@ class _ZemljevidScreenState extends State<ZemljevidScreen> {
                             SizedBox(height: 4),
                             Row(children: [
                               Icon(Icons.restaurant,
-                                  size: 18, color: Color(0xFFE65100)),
+                                  size: 18, color: Paleta.tolmun),
                               SizedBox(width: 6),
                               Text('Gostilna'),
                             ]),

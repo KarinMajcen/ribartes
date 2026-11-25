@@ -86,13 +86,13 @@ class AuthService {
       case 'INVALID_LOGIN_CREDENTIALS':
         return 'Napačna e-pošta ali geslo.';
       case 'network-request-failed':
-        return 'Ni povezave. Preverite internet in poskusite znova.';
+        return 'Ni povezave. Preveri internet in poskusi znova.';
       case 'too-many-requests':
-        return 'Preveč poskusov. Poskusite znova čez nekaj minut.';
+        return 'Preveč poskusov. Poskusi znova čez nekaj minut.';
       case 'user-disabled':
         return 'Ta račun je onemogočen.';
       default:
-        return 'Prišlo je do napake ($koda). Poskusite znova.';
+        return 'Prišlo je do napake ($koda). Poskusi znova.';
     }
   }
 }

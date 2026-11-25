@@ -45,7 +45,7 @@ class DovolilnicaService {
     bool unovciTocke = false,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) throw NakupNapaka('Za nakup se morate prijaviti.');
+    if (user == null) throw NakupNapaka('Za nakup se prijavi.');
 
     final zdaj = DateTime.now();
     final danes = DateTime(zdaj.year, zdaj.month, zdaj.day);
@@ -68,7 +68,7 @@ class DovolilnicaService {
           final tocke = (uporabnik.data()?['tocke'] as num?)?.toInt() ?? 0;
           popust = Popust.izracunaj(tocke: tocke, cena: polnaCena);
           if (popust == 0) {
-            throw NakupNapaka('Za popust potrebujete vsaj '
+            throw NakupNapaka('Za popust potrebuješ vsaj '
                 '${Popust.tockNaEvro} točk.');
           }
           tx.update(uporabnikRef, {
@@ -99,7 +99,7 @@ class DovolilnicaService {
       throw NakupNapaka(_niPovezave);
     } on FirebaseException catch (e) {
       if (e.code == 'unavailable') throw NakupNapaka(_niPovezave);
-      throw NakupNapaka('Nakup ni uspel (${e.code}). Poskusite znova.');
+      throw NakupNapaka('Nakup ni uspel (${e.code}). Poskusi znova.');
     }
   }
 

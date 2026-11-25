@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
+import '../tema/tema.dart';
 
 /// Uvodni zaslon ob zagonu: riba skoči iz vode v loku, za njo kapljice,
 /// nato se pokažeta ime aplikacije in slogan. Traja okoli 2 sekundi.
@@ -35,7 +36,7 @@ class _UvodniZaslonState extends State<UvodniZaslon>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF4FB3D9), Color(0xFF1B6E8C), Color(0xFF0E4A5F)],
+            colors: const [Paleta.socaSvetla, Paleta.soca, Paleta.tolmun],
           ),
         ),
         child: Column(
@@ -151,7 +152,7 @@ class _SkokRibe extends CustomPainter {
             ..close(),
           telo);
       c.drawCircle(const Offset(20, -4), 3.5,
-          Paint()..color = const Color(0xFF0E4A5F));
+          Paint()..color = Paleta.tolmun);
       c.restore();
     }
   }

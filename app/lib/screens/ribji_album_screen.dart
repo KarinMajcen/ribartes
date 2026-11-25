@@ -7,6 +7,8 @@ import '../models/vrsta_ribe.dart';
 import '../services/ulov_service.dart';
 import '../utils/format.dart';
 import 'nov_ulov_screen.dart';
+import '../tema/tema.dart';
+import '../widgets/prazno_stanje.dart';
 
 /// Zaslon "Ribji album" – zavihka Album (US-08) in Moji ulovi (US-07).
 class RibjiAlbumScreen extends StatefulWidget {
@@ -155,6 +157,7 @@ class _Kartica extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final barve = Theme.of(context).colorScheme;
+    final rb = context.ribartes;
     final odklenjena = stevilo > 0;
 
     return GestureDetector(
@@ -167,7 +170,7 @@ class _Kartica extends StatelessWidget {
       child: Card(
         clipBehavior: Clip.antiAlias,
         color: odklenjena
-            ? (vrsta.redka ? const Color(0xFFFFF4D6) : barve.primaryContainer)
+            ? (vrsta.redka ? rb.nagradaOzadje : barve.primary.withValues(alpha: 0.12))
             : barve.surfaceContainerHighest,
         // Redka kartica: zlat rob
         shape: vrsta.redka
@@ -175,8 +178,8 @@ class _Kartica extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 side: BorderSide(
                   color: odklenjena
-                      ? const Color(0xFFFFB300)
-                      : const Color(0xFFFFB300).withValues(alpha: 0.4),
+                      ? rb.nagrada
+                      : rb.nagrada.withValues(alpha: 0.4),
                   width: 2.5,
                 ),
               )
@@ -195,7 +198,7 @@ class _Kartica extends StatelessWidget {
                 odklenjena ? Icons.phishing : Icons.lock,
                 size: 40,
                 color: odklenjena
-                    ? (vrsta.redka ? const Color(0xFFB8860B) : barve.primary)
+                    ? (vrsta.redka ? rb.nagradaBesedilo : barve.primary)
                     : barve.outline,
               ),
               const SizedBox(height: 8),
@@ -206,7 +209,7 @@ class _Kartica extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: odklenjena
-                      ? (vrsta.redka ? Colors.brown.shade900 : null)
+                      ? (vrsta.redka ? rb.nagradaBesedilo : null)
                       : barve.outline,
                 ),
               ),
@@ -215,7 +218,7 @@ class _Kartica extends StatelessWidget {
                 Text(
                   '×$stevilo · ${najdaljsi!.toStringAsFixed(0)} cm',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: vrsta.redka ? Colors.brown.shade700 : null),
+                      color: vrsta.redka ? rb.nagradaBesedilo : null),
                 ),
               ],
               if (vrsta.redka)
@@ -225,7 +228,7 @@ class _Kartica extends StatelessWidget {
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: odklenjena
-                        ? const Color(0xFFB8860B)
+                        ? rb.nagradaBesedilo
                         : barve.outline,
                   ),
                 ),
@@ -311,7 +314,7 @@ class _PodrobnostiVrste extends StatelessWidget {
                       subtitle: Text('${formatDatum(razvrsceni[i].datum)}'
                           '${razvrsceni[i].revirIme == null ? '' : ' · ${razvrsceni[i].revirIme}'}'),
                       trailing: razvrsceni[i].spuscena
-                          ? const Icon(Icons.eco, color: Colors.green)
+                          ? Icon(Icons.eco, color: context.ribartes.narava)
                           : null,
                     ),
                 ],
@@ -333,13 +336,14 @@ class _SeznamUlovov extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (ulovi.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Text(
-            'Še nimate ulovov.\nTapnite »Nov ulov«.',
-            textAlign: TextAlign.center,
-          ),
+      return PraznoStanje(
+        ikona: Icons.phishing,
+        naslov: 'Še ni ulovov',
+        razlaga: 'Ko kaj ujameš, vpiši ulov. Prva riba vsake vrste '
+            'odklene kartico v albumu.',
+        gumb: 'Vpiši ulov',
+        onGumb: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const NovUlovScreen()),
         ),
       );
     }
@@ -430,9 +434,9 @@ class _UlovKartica extends StatelessWidget {
         title: Text('${u.vrstaIme} · ${u.dolzinaCm.toStringAsFixed(0)} cm$teza'),
         subtitle: Text('${formatDatum(u.datum)}$kraj'),
         trailing: u.spuscena
-            ? const Tooltip(
+            ? Tooltip(
                 message: 'Vrnjena v reko',
-                child: Icon(Icons.eco, color: Colors.green),
+                child: Icon(Icons.eco, color: context.ribartes.narava),
               )
             : null,
       ),

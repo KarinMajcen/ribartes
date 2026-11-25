@@ -133,7 +133,7 @@ class _RezervacijaScreenState extends State<RezervacijaScreen> {
           Text('Ura', style: besedilo.titleMedium),
           const SizedBox(height: 8),
           if (termini.isEmpty)
-            Text('Za ta dan ni več prostih terminov. Izberite drug dan.',
+            Text('Za ta dan ni več prostih terminov. Izberi drug dan.',
                 style: TextStyle(color: barve.error))
           else
             Wrap(
@@ -241,7 +241,7 @@ class _RezervacijaScreenState extends State<RezervacijaScreen> {
                   )
                 : const Icon(Icons.event_available),
             label: Text(termin == null
-                ? 'Izberite uro'
+                ? 'Izberi uro'
                 : 'Rezerviraj ob ${formatUra(termin)} · '
                     '${formatCena(g.cenaPriprave * _osebe)}'),
             // Brez izbrane (prihodnje) ure je gumb onemogočen.

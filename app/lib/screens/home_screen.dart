@@ -12,6 +12,7 @@ import 'lestvica_screen.dart';
 import 'app_shell.dart';
 import 'nov_ulov_screen.dart';
 import 'preveri_dovolilnico_screen.dart';
+import '../tema/tema.dart';
 
 /// Domači zaslon: veljavna dovolilnica na vrhu, točke in hitri dostop
 /// do glavnih funkcij (zaslon 2 iz prijave ideje).
@@ -123,15 +124,22 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 8),
 
               Card(
+                color: context.ribartes.nagradaOzadje,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(Zaobljenost.kartica),
+                  side: BorderSide(
+                      color: context.ribartes.nagrada.withValues(alpha: 0.5)),
+                ),
                 child: ListTile(
-                  leading: const Icon(Icons.stars),
+                  leading: Icon(Icons.stars, color: context.ribartes.nagrada),
                   title: const Text('Točke ujemi in spusti'),
                   subtitle: Text(tocke >= Popust.tockNaEvro
                       ? 'Na voljo za popust pri dovolilnici'
                       : 'Še ${Popust.tockNaEvro - tocke} do prvega popusta'),
                   trailing: Text(
                     '$tocke',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: context.ribartes.nagradaBesedilo),
                   ),
                 ),
               ),
@@ -177,7 +185,7 @@ class _VeljavnaDovolilnica extends StatelessWidget {
         ? 'danes do 23:59'
         : 'do ${formatDatum(d.veljaDo)}';
     return Card(
-      color: Colors.green.shade700,
+      color: context.ribartes.uspeh,
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: const Icon(Icons.qr_code_2, color: Colors.white, size: 40),
@@ -211,18 +219,15 @@ class _PotekaKmalu extends StatelessWidget {
         ? 'čez ${ostane.inHours} h'
         : 'čez ${ostane.inMinutes.clamp(1, 59)} min';
     return Card(
-      color: const Color(0xFFFFF3CD),
+      color: context.ribartes.opozorilo.withValues(alpha: 0.12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(Zaobljenost.kartica),
+        side: BorderSide(color: context.ribartes.opozorilo, width: 1.5),
+      ),
       child: ListTile(
-        leading: const Icon(Icons.timer, color: Color(0xFF8A6D00)),
-        title: Text(
-          'Dovolilnica za ${d.revirIme} poteče $cez',
-          style: const TextStyle(
-              color: Color(0xFF5C4800), fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          'Velja do ${formatDatum(d.veljaDo)}, 23:59',
-          style: const TextStyle(color: Color(0xFF5C4800)),
-        ),
+        leading: Icon(Icons.timer, color: context.ribartes.opozorilo),
+        title: Text('Dovolilnica za ${d.revirIme} poteče $cez'),
+        subtitle: Text('Velja do ${formatDatum(d.veljaDo)}, 23:59'),
       ),
     );
   }

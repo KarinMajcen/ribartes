@@ -29,7 +29,10 @@ class _AppShellState extends State<AppShell> {
         children: [
           HomeScreen(onPojdiNa: _pojdiNa),
           const RevirjiScreen(),
-          MojeDovolilniceScreen(aktiven: _zavihek == Zavihek.dovolilnice),
+          MojeDovolilniceScreen(
+            aktiven: _zavihek == Zavihek.dovolilnice,
+            onKupi: () => _pojdiNa(Zavihek.revirji),
+          ),
           const RibjiAlbumScreen(),
           const ProfilScreen(),
         ],

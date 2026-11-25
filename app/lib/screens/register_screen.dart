@@ -76,7 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     prefixIcon: Icon(Icons.person_outline),
                   ),
                   validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Vnesite ime.'
+                      ? 'Vpiši ime.'
                       : null,
                 ),
                 const SizedBox(height: 16),
@@ -89,7 +89,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
                   validator: (v) => (v == null || !v.contains('@'))
-                      ? 'Vnesite veljaven e-poštni naslov.'
+                      ? 'Vpiši veljaven e-poštni naslov.'
                       : null,
                 ),
                 const SizedBox(height: 16),

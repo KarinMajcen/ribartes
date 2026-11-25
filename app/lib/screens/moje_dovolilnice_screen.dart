@@ -5,12 +5,17 @@ import '../services/dovolilnica_service.dart';
 import '../utils/format.dart';
 import '../widgets/stric_ribic.dart';
 import 'dovolilnica_qr_screen.dart';
+import '../widgets/prazno_stanje.dart';
 
 /// Zaslon "Moje dovolilnice" – pokriva US-06.
 class MojeDovolilniceScreen extends StatefulWidget {
   /// Ali je zavihek trenutno viden (takrat pride stric).
   final bool aktiven;
-  const MojeDovolilniceScreen({super.key, this.aktiven = true});
+
+  /// Kaj naredi gumb "Kupi dovolilnico" v stričkovem oblačku.
+  final VoidCallback? onKupi;
+
+  const MojeDovolilniceScreen({super.key, this.aktiven = true, this.onKupi});
 
   @override
   State<MojeDovolilniceScreen> createState() => _MojeDovolilniceScreenState();
@@ -42,6 +47,7 @@ class _MojeDovolilniceScreenState extends State<MojeDovolilniceScreen> {
                   child: StricRibic(
                     imaVeljavno: imaVeljavno,
                     aktiven: widget.aktiven,
+                    onKupi: widget.onKupi,
                   ),
                 ),
             ],
@@ -63,15 +69,14 @@ class _MojeDovolilniceScreenState extends State<MojeDovolilniceScreen> {
 
     final vse = snapshot.data!;
     if (vse.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Text(
-            'Še nimate dovolilnic.\nKupite jo pri izbranem revirju.',
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
+      return PraznoStanje(
+          ikona: Icons.qr_code_2,
+          naslov: 'Še nimaš dovolilnice',
+          razlaga: 'Izberi revir in kupi dovolilnico. Tukaj se nato '
+              'pojavi njena QR koda za čuvaja.',
+          gumb: 'Poišči revir',
+          onGumb: widget.onKupi,
+        );
     }
 
     // Aktivne (veljavne in prihodnje) zgoraj, najprej tiste, ki začnejo prej.

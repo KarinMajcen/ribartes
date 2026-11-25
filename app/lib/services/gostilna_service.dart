@@ -22,7 +22,7 @@ class GostilnaService {
       _db.collection('rezervacije');
 
   static const _niPovezave =
-      'Rezervacija ni uspela, ni povezave. Poskusite znova.';
+      'Rezervacija ni uspela, ni povezave. Poskusi znova.';
 
   Stream<List<Gostilna>> gostilne() {
     return _db.collection('gostilne').orderBy('ime').snapshots().map(
@@ -50,9 +50,9 @@ class GostilnaService {
     String opomba = '',
   }) async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) throw RezervacijaNapaka('Za rezervacijo se prijavite.');
+    if (user == null) throw RezervacijaNapaka('Za rezervacijo se prijavi.');
     if (!termin.isAfter(DateTime.now())) {
-      throw RezervacijaNapaka('Termin je že minil. Izberite drugo uro.');
+      throw RezervacijaNapaka('Termin je že minil. Izberi drugo uro.');
     }
 
     final ref = _rezervacije.doc();

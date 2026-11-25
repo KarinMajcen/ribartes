@@ -54,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailCtrl.text.trim();
     if (!email.contains('@')) {
       setState(() => _napaka =
-          'Vpišite e-pošto zgoraj, nato tapnite »Pozabljeno geslo?«.');
+          'Vpiši e-pošto zgoraj, nato tapni »Pozabljeno geslo?«.');
       return;
     }
     setState(() {
@@ -121,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       prefixIcon: Icon(Icons.email_outlined),
                     ),
                     validator: (v) => (v == null || !v.contains('@'))
-                        ? 'Vnesite veljaven e-poštni naslov.'
+                        ? 'Vpiši veljaven e-poštni naslov.'
                         : null,
                   ),
                   const SizedBox(height: 16),
@@ -142,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     validator: (v) =>
-                        (v == null || v.isEmpty) ? 'Vnesite geslo.' : null,
+                        (v == null || v.isEmpty) ? 'Vpiši geslo.' : null,
                     onFieldSubmitted: (_) => _prijava(),
                   ),
                   Align(

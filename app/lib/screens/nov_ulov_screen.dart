@@ -11,6 +11,7 @@ import '../models/vrsta_ribe.dart';
 import '../services/revir_service.dart';
 import '../services/ulov_service.dart';
 import '../widgets/ribji_konfeti.dart';
+import '../tema/tema.dart';
 
 /// Zaslon "Nov ulov" – pokriva US-07 (in US-09: ujemi in spusti).
 class NovUlovScreen extends StatefulWidget {
@@ -106,7 +107,7 @@ class _NovUlovScreenState extends State<NovUlovScreen> {
                 child: Transform.scale(scale: v, child: child),
               ),
               child: const Icon(Icons.emoji_events,
-                  size: 72, color: Color(0xFFFFB300)),
+                  size: 72, color: Paleta.muha),
             ),
             title: Text(vrsta.redka ? '✨ Redka kartica! ✨' : 'Nova kartica!'),
             content: Text(
@@ -172,7 +173,7 @@ class _NovUlovScreenState extends State<NovUlovScreen> {
                       DropdownMenuItem(value: v.id, child: Text(v.ime)),
                   ],
                   onChanged: (id) => setState(() => _vrstaId = id),
-                  validator: (id) => id == null ? 'Izberite vrsto ribe.' : null,
+                  validator: (id) => id == null ? 'Izberi vrsto ribe.' : null,
                 );
               },
             ),
@@ -227,7 +228,7 @@ class _NovUlovScreenState extends State<NovUlovScreen> {
                     onChanged: (_) => setState(() {}),
                     validator: (v) {
                       final x = _stevilo(v ?? '');
-                      if (x == null) return 'Vnesite dolžino.';
+                      if (x == null) return 'Vpiši dolžino.';
                       if (x <= 0 || x > 300) return 'Med 1 in 300 cm.';
                       return null;
                     },

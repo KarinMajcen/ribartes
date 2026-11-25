@@ -6,6 +6,7 @@ import '../utils/format.dart';
 import '../widgets/reka_glava.dart';
 import 'revir_detail_screen.dart';
 import 'zemljevid_screen.dart';
+import '../widgets/prazno_stanje.dart';
 
 /// Zaslon "Revirji" – pokriva US-03.
 class RevirjiScreen extends StatefulWidget {
@@ -53,7 +54,7 @@ class _RevirjiScreenState extends State<RevirjiScreen> {
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return const _Sporocilo(
-                    'Revirjev ni bilo mogoče naložiti. Poskusite znova.',
+                    'Revirjev ni bilo mogoče naložiti. Poskusi znova.',
                   );
                 }
                 if (!snapshot.hasData) {
@@ -65,8 +66,11 @@ class _RevirjiScreenState extends State<RevirjiScreen> {
 
                 if (revirji.isEmpty) {
                   // Scenarij "ni zadetkov" iz US-03.
-                  return const _Sporocilo(
-                    'Ni revirjev, ki ustrezajo iskanju.',
+                  return const PraznoStanje(
+                    ikona: Icons.search_off,
+                    naslov: 'Ni revirjev, ki ustrezajo iskanju',
+                    razlaga: 'Poskusi z imenom reke ali vrste ribe, '
+                        'npr. »Soča« ali »lipan«.',
                   );
                 }
 

@@ -10,6 +10,7 @@ import '../services/dovolilnica_service.dart';
 import '../services/revir_service.dart';
 import '../utils/format.dart';
 import '../widgets/stric_ribic.dart';
+import '../tema/tema.dart';
 
 /// Izid preverjanja – vsak ima svojo barvo in besedilo.
 enum _Izid { veljavna, seNeVelja, potekla, drugRevir, neObstaja, neznana, niPovezave }
@@ -221,31 +222,32 @@ class _PanelRezultata extends StatelessWidget {
   Widget build(BuildContext context) {
     final d = rezultat.dovolilnica;
 
+    final rb = context.ribartes;
     final (barva, ikona, naslov) = switch (rezultat.izid) {
-      _Izid.veljavna => (Colors.green.shade700, Icons.check_circle, 'Veljavna'),
+      _Izid.veljavna => (rb.uspeh, Icons.check_circle, 'Veljavna'),
       _Izid.seNeVelja => (
-          Colors.orange.shade800,
+          rb.opozorilo,
           Icons.schedule,
           'Še ne velja – velja od ${formatDatum(d!.veljaOd)}'
         ),
       _Izid.potekla => (
-          Colors.red.shade700,
+          rb.napaka,
           Icons.cancel,
           'Ni veljavna – potekla ${formatDatum(d!.veljaDo)}'
         ),
       _Izid.drugRevir => (
-          Colors.orange.shade800,
+          rb.opozorilo,
           Icons.wrong_location,
           'Velja za drug revir: ${d!.revirIme}'
         ),
       _Izid.neObstaja => (
-          Colors.red.shade700,
+          rb.napaka,
           Icons.help,
           'Dovolilnica ne obstaja'
         ),
-      _Izid.neznana => (Colors.grey.shade700, Icons.qr_code, 'Neznana koda'),
+      _Izid.neznana => (rb.nevtralno, Icons.qr_code, 'Neznana koda'),
       _Izid.niPovezave => (
-          Colors.grey.shade700,
+          rb.nevtralno,
           Icons.wifi_off,
           'Ni povezave – dovolilnice ni mogoče preveriti'
         ),

@@ -6,6 +6,8 @@ import '../models/ulov.dart';
 import '../services/revir_service.dart';
 import '../services/ulov_service.dart';
 import '../utils/format.dart';
+import '../tema/tema.dart';
+import '../widgets/prazno_stanje.dart';
 
 /// Zaslon "Tedenska lestvica" – pokriva US-12.
 class LestvicaScreen extends StatefulWidget {
@@ -90,8 +92,11 @@ class _LestvicaScreenState extends State<LestvicaScreen> {
 
                     if (lestvica.isEmpty) {
                       // Scenarij "ni ulovov" iz US-12.
-                      return const _Sporocilo(
-                          'Ta teden še ni ulovov. Bodi prvi!');
+                      return const PraznoStanje(
+                        ikona: Icons.leaderboard,
+                        naslov: 'Ta teden še ni ulovov',
+                        razlaga: 'Vpiši ulov s te reke in bodi prvi na lestvici.',
+                      );
                     }
 
                     final prikaz = lestvica.take(_najvec).toList();
@@ -142,9 +147,9 @@ class _Oder extends StatelessWidget {
   Widget build(BuildContext context) {
     // vrstni red na odru: 2., 1., 3.
     final razpored = <(int, double, Color)>[
-      (2, 90, const Color(0xFFB0BEC5)), // srebro
-      (1, 125, const Color(0xFFFFC107)), // zlato
-      (3, 70, const Color(0xFFD7A26B)), // bron
+      (2, 90, const Color(0xFFB8C4C0)), // srebro
+      (1, 125, Paleta.muha), // zlato = barva nagrad
+      (3, 70, const Color(0xFFC98A5A)), // bron
     ];
 
     return SizedBox(
@@ -281,9 +286,9 @@ class _Vrstica extends StatelessWidget {
           '${ulov.revirIme == null ? '' : ' · ${ulov.revirIme}'}',
         ),
         trailing: ulov.spuscena
-            ? const Tooltip(
+            ? Tooltip(
                 message: 'Vrnjena v reko',
-                child: Icon(Icons.eco, color: Colors.green),
+                child: Icon(Icons.eco, color: context.ribartes.narava),
               )
             : null,
       ),

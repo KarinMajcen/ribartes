@@ -7,6 +7,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../models/dovolilnica.dart';
 import '../services/dovolilnica_service.dart';
 import '../utils/format.dart';
+import '../tema/tema.dart';
 
 /// Zaslon z QR kodo dovolilnice, ki jo ribič pokaže čuvaju – US-06.
 class DovolilnicaQrScreen extends StatelessWidget {
@@ -119,11 +120,11 @@ class _VsebinaState extends State<_Vsebina>
                       borderRadius: BorderRadius.circular(21),
                       gradient: SweepGradient(
                         colors: const [
-                          Color(0xFF00C853),
-                          Color(0xFF00B8D4),
-                          Color(0xFF2962FF),
-                          Color(0xFFAA00FF),
-                          Color(0xFF00C853),
+                          Paleta.socaSvetla,
+                          Paleta.soca,
+                          Color(0xFF5FA8D3),
+                          Paleta.muha,
+                          Paleta.socaSvetla,
                         ],
                         transform:
                             GradientRotation(_vrtenje.value * 2 * math.pi),
@@ -217,9 +218,9 @@ class OznakaStanja extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (barva, ikona) = switch (stanje) {
-      StanjeDovolilnice.veljavna => (Colors.green.shade700, Icons.check_circle),
-      StanjeDovolilnice.seNeVelja => (Colors.blue.shade700, Icons.schedule),
-      StanjeDovolilnice.potekla => (Colors.grey.shade600, Icons.cancel),
+      StanjeDovolilnice.veljavna => (context.ribartes.uspeh, Icons.check_circle),
+      StanjeDovolilnice.seNeVelja => (context.ribartes.opozorilo, Icons.schedule),
+      StanjeDovolilnice.potekla => (context.ribartes.nevtralno, Icons.cancel),
     };
     return Chip(
       avatar: Icon(ikona, color: Colors.white, size: 18),

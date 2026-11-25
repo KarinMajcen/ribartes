@@ -129,7 +129,7 @@ class _NakupScreenState extends State<NakupScreen> {
     final String opisTock;
     if (tocke < Popust.tockNaEvro) {
       opisTock = 'Imaš $tocke točk. '
-          'Za popust potrebujete vsaj ${Popust.tockNaEvro} točk.';
+          'Za popust potrebuješ vsaj ${Popust.tockNaEvro} točk.';
     } else if (moznPopust == 0) {
       opisTock = 'Imaš $tocke točk. Za to ceno popust ni mogoč.';
     } else {

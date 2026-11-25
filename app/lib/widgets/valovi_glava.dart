@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
+import '../tema/tema.dart';
 
 /// Animirana glava domačega zaslona: pozdrav glede na uro, nasvet dneva,
 /// valovi, ki se premikajo, in ribica, ki plava čez.
@@ -69,7 +70,7 @@ class _ValoviGlavaState extends State<ValoviGlava>
             end: Alignment.bottomRight,
             colors: _noc
                 ? const [Color(0xFF0B1D3A), Color(0xFF1F2F5C)]
-                : [barve.primary, const Color(0xFF0E4A5F)],
+                : const [Paleta.soca, Paleta.tolmun],
           ),
         ),
         child: Stack(
@@ -189,7 +190,7 @@ class _Valovi extends CustomPainter {
           ..close(),
         riba);
     c.drawCircle(const Offset(6, -1.5), 1.5,
-        Paint()..color = const Color(0xFF0E4A5F));
+        Paint()..color = Paleta.tolmun);
     c.restore();
 
     _val(c, s, 28, 6, faza, Colors.white.withValues(alpha: 0.18));

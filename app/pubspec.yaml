@@ -49,6 +49,7 @@ dependencies:
   http: ^1.6.0
   flutter_map: ^8.3.2
   latlong2: ^0.10.1
+  google_fonts: ^9.0.0
 
 dev_dependencies:
   flutter_test:
@@ -109,5 +110,5 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/icon/ikona.png"
   remove_alpha_ios: true
-  adaptive_icon_background: "#1B6E8C"
+  adaptive_icon_background: "#0E7C6B"
   adaptive_icon_foreground: "assets/icon/ikona_ospredje.png"
